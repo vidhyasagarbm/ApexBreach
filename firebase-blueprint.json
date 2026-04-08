@@ -1,0 +1,118 @@
+{
+  "entities": {
+    "Message": {
+      "title": "Message",
+      "description": "A chat message in the War Room",
+      "type": "object",
+      "properties": {
+        "content": {
+          "type": "string",
+          "description": "The text content of the message"
+        },
+        "userId": {
+          "type": "string",
+          "description": "The UID of the user who sent the message"
+        },
+        "userName": {
+          "type": "string",
+          "description": "The display name of the user"
+        },
+        "userPhoto": {
+          "type": "string",
+          "description": "The photo URL of the user"
+        },
+        "role": {
+          "type": "string",
+          "enum": ["admin", "user", "system"],
+          "description": "The role of the sender"
+        },
+        "createdAt": {
+          "type": "string",
+          "format": "date-time",
+          "description": "The timestamp when the message was created"
+        }
+      },
+      "required": ["content", "userId", "userName", "role", "createdAt"]
+    },
+    "User": {
+      "title": "User",
+      "description": "A user profile in the system",
+      "type": "object",
+      "properties": {
+        "uid": {
+          "type": "string",
+          "description": "The Firebase Auth UID"
+        },
+        "displayName": {
+          "type": "string",
+          "description": "The user's display name"
+        },
+        "email": {
+          "type": "string",
+          "format": "email",
+          "description": "The user's email address"
+        },
+        "photoURL": {
+          "type": "string",
+          "description": "The user's profile photo URL"
+        },
+        "role": {
+          "type": "string",
+          "enum": ["admin", "user"],
+          "description": "The user's system role"
+        },
+        "xp": {
+          "type": "number",
+          "description": "Experience points earned"
+        },
+        "level": {
+          "type": "number",
+          "description": "User level"
+        },
+        "badges": {
+          "type": "array",
+          "items": { "type": "string" },
+          "description": "List of earned badges"
+        },
+        "completedCTFs": {
+          "type": "array",
+          "items": { "type": "string" },
+          "description": "List of completed CTF scenario IDs"
+        },
+        "lastSeen": {
+          "type": "string",
+          "format": "date-time",
+          "description": "The last time the user was active"
+        }
+      },
+      "required": ["uid", "displayName", "email", "role"]
+    },
+    "CVE": {
+      "title": "CVE",
+      "description": "Cached CVE information",
+      "type": "object",
+      "properties": {
+        "cveId": { "type": "string" },
+        "description": { "type": "string" },
+        "severity": { "type": "string" },
+        "publishedDate": { "type": "string" },
+        "lastModifiedDate": { "type": "string" }
+      },
+      "required": ["cveId", "description"]
+    }
+  },
+  "firestore": {
+    "/messages/{messageId}": {
+      "schema": "Message",
+      "description": "Global chat messages for the War Room"
+    },
+    "/users/{userId}": {
+      "schema": "User",
+      "description": "User profiles and roles"
+    },
+    "/cve_cache/{cveId}": {
+      "schema": "CVE",
+      "description": "Cache for CVE data"
+    }
+  }
+}
