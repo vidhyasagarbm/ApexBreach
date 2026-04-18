@@ -32,15 +32,43 @@ const PAYLOAD_TEMPLATES = [
   }
 ];
 
-export const PayloadGenerator: React.FC = () => {
+export interface PayloadPrefill {
+  tool?: string;
+  command?: string;
+}
+
+interface PayloadGeneratorProps {
+  prefill?: PayloadPrefill | null;
+}
+
+export const PayloadGenerator: React.FC<PayloadGeneratorProps> = ({ prefill }) => {
   const [lhost, setLhost] = useState('10.10.10.10');
   const [lport, setLport] = useState('4444');
   const [selectedTemplate, setSelectedTemplate] = useState(PAYLOAD_TEMPLATES[0]);
+  const [customCommand, setCustomCommand] = useState<string | null>(null);
   const [copied, setCopied] = useState(false);
 
-  const generatedPayload = selectedTemplate.template
-    .replace(/{LHOST}/g, lhost)
-    .replace(/{LPORT}/g, lport);
+  // Handle prefill
+  React.useEffect(() => {
+    if (prefill) {
+      if (prefill.command) {
+        setCustomCommand(prefill.command);
+      } else if (prefill.tool) {
+        const template = PAYLOAD_TEMPLATES.find(t => 
+          t.name.toLowerCase().includes(prefill.tool!.toLowerCase()) || 
+          t.id.toLowerCase().includes(prefill.tool!.toLowerCase())
+        );
+        if (template) {
+          setSelectedTemplate(template);
+          setCustomCommand(null);
+        }
+      }
+    }
+  }, [prefill]);
+
+  const generatedPayload = customCommand 
+    ? customCommand.replace(/{LHOST}/g, lhost).replace(/{LPORT}/g, lport)
+    : selectedTemplate.template.replace(/{LHOST}/g, lhost).replace(/{LPORT}/g, lport);
 
   const handleCopy = () => {
     navigator.clipboard.writeText(generatedPayload);
@@ -49,7 +77,7 @@ export const PayloadGenerator: React.FC = () => {
   };
 
   return (
-    <div className="space-y-6 p-6 bg-black/40 border border-terminal-border rounded-xl">
+    <div className="space-y-4 p-4 lg:p-6 bg-black/40 border border-terminal-border rounded-xl">
       <div className="flex items-center gap-3 mb-2">
         <Zap className="w-5 h-5 text-terminal-green" />
         <h3 className="text-lg font-bold text-terminal-green uppercase tracking-tight">Payload Forge</h3>
@@ -57,17 +85,17 @@ export const PayloadGenerator: React.FC = () => {
 
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
         <div className="space-y-2">
-          <Label className="text-[10px] font-mono text-terminal-text/50 uppercase">Template</Label>
+          <Label className="text-xs font-mono text-terminal-text/50 uppercase">Template</Label>
           <Select 
             value={selectedTemplate.id} 
             onValueChange={(val) => setSelectedTemplate(PAYLOAD_TEMPLATES.find(t => t.id === val)!)}
           >
-            <SelectTrigger className="bg-black/60 border-terminal-border text-xs font-mono">
+            <SelectTrigger className="bg-black/60 border-terminal-border text-sm font-mono">
               <SelectValue placeholder="Select template" />
             </SelectTrigger>
             <SelectContent className="bg-terminal-bg border-terminal-border text-terminal-text">
               {PAYLOAD_TEMPLATES.map(t => (
-                <SelectItem key={t.id} value={t.id} className="text-xs font-mono focus:bg-terminal-green/20 focus:text-terminal-green">
+                <SelectItem key={t.id} value={t.id} className="text-sm font-mono focus:bg-terminal-green/20 focus:text-terminal-green">
                   {t.name}
                 </SelectItem>
               ))}
@@ -76,29 +104,29 @@ export const PayloadGenerator: React.FC = () => {
         </div>
 
         <div className="space-y-2">
-          <Label className="text-[10px] font-mono text-terminal-text/50 uppercase">LHOST</Label>
+          <Label className="text-xs font-mono text-terminal-text/50 uppercase">LHOST</Label>
           <Input 
             value={lhost} 
             onChange={(e) => setLhost(e.target.value)}
-            className="bg-black/60 border-terminal-border text-xs font-mono"
+            className="bg-black/60 border-terminal-border text-sm font-mono"
           />
         </div>
 
         <div className="space-y-2">
-          <Label className="text-[10px] font-mono text-terminal-text/50 uppercase">LPORT</Label>
+          <Label className="text-xs font-mono text-terminal-text/50 uppercase">LPORT</Label>
           <Input 
             value={lport} 
             onChange={(e) => setLport(e.target.value)}
-            className="bg-black/60 border-terminal-border text-xs font-mono"
+            className="bg-black/60 border-terminal-border text-sm font-mono"
           />
         </div>
       </div>
 
       <div className="relative group">
-        <div className="absolute -top-2 left-4 px-2 bg-terminal-bg text-[9px] font-mono text-terminal-green uppercase tracking-widest border border-terminal-green/30 rounded">
+        <div className="absolute -top-2 left-4 px-2 bg-terminal-bg text-[10px] font-mono text-terminal-green uppercase tracking-widest border border-terminal-green/30 rounded">
           Generated Output
         </div>
-        <div className="p-4 pt-6 bg-black/80 border border-terminal-border rounded-lg font-mono text-xs text-terminal-green/90 break-all min-h-[100px]">
+        <div className="p-4 pt-6 bg-black/80 border border-terminal-border rounded-lg font-mono text-sm text-terminal-green break-all min-h-[100px]">
           {generatedPayload}
         </div>
         <Button 
@@ -111,7 +139,7 @@ export const PayloadGenerator: React.FC = () => {
         </Button>
       </div>
 
-      <div className="flex items-center gap-2 text-[10px] font-mono text-terminal-text/40 italic">
+      <div className="flex items-center gap-2 text-xs font-mono text-terminal-text/40 italic">
         <Terminal className="w-3 h-3" />
         <span>Note: Always verify payloads in a controlled environment before engagement.</span>
       </div>

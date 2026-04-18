@@ -6,7 +6,11 @@ import { Input } from '@/components/ui/input';
 import { searchCVE } from '@/src/services/gemini';
 import ReactMarkdown from 'react-markdown';
 
-export const CVEIntelligence: React.FC = () => {
+interface CVEIntelligenceProps {
+  onWeaponize?: (cveId: string) => void;
+}
+
+export const CVEIntelligence: React.FC<CVEIntelligenceProps> = ({ onWeaponize }) => {
   const [query, setQuery] = useState('');
   const [results, setResults] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(false);
@@ -19,23 +23,27 @@ export const CVEIntelligence: React.FC = () => {
     setIsLoading(false);
   };
 
+  const isCVEQuery = query.toUpperCase().startsWith('CVE-');
+
   return (
-    <div className="h-full flex flex-col bg-black/20 overflow-hidden">
-      <div className="p-8 border-b border-terminal-border bg-black/40">
-        <div className="flex items-center gap-3 mb-6">
-          <ShieldAlert className="w-6 h-6 text-red-500" />
+    <div className="h-full flex flex-col bg-black/10 overflow-hidden">
+      <div className="p-10 border-b border-obsidian-border bg-obsidian-bg/80 backdrop-blur-xl">
+        <div className="flex items-center gap-4 mb-8">
+          <div className="w-12 h-12 rounded-2xl bg-red-500/10 flex items-center justify-center border border-red-500/20">
+            <ShieldAlert className="w-6 h-6 text-red-500" />
+          </div>
           <div>
-            <h2 className="text-xl font-bold font-mono text-terminal-text uppercase tracking-tight">CVE Intelligence Center</h2>
-            <p className="text-[10px] font-mono text-terminal-text/40 uppercase tracking-widest">Real-time Vulnerability Research</p>
+            <h2 className="text-2xl font-bold font-display text-text-primary tracking-tight">CVE Intelligence Center</h2>
+            <p className="text-[10px] font-mono text-text-secondary uppercase tracking-widest">Real-time Vulnerability Research</p>
           </div>
         </div>
 
-        <div className="flex gap-3">
+        <div className="flex gap-4">
           <div className="relative flex-1">
-            <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-terminal-text/40" />
+            <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-text-secondary" />
             <Input 
-              placeholder="Search by software, vendor, or CVE ID (e.g., 'Log4j', 'Microsoft', 'CVE-2021-44228')..." 
-              className="pl-10 bg-black/40 border-terminal-border focus:border-terminal-green/50 text-xs font-mono h-12"
+              placeholder="Search by software, vendor, or CVE ID (e.g., 'Log4j', 'CVE-2021-44228')..." 
+              className="pl-12 bg-obsidian-card border-obsidian-border focus:border-accent/50 text-sm h-14 rounded-xl"
               value={query}
               onChange={(e) => setQuery(e.target.value)}
               onKeyDown={(e) => e.key === 'Enter' && handleSearch()}
@@ -44,24 +52,24 @@ export const CVEIntelligence: React.FC = () => {
           <Button 
             onClick={handleSearch}
             disabled={isLoading || !query.trim()}
-            className="bg-terminal-green text-black hover:bg-terminal-green/90 font-mono font-bold px-8 h-12"
+            className="bg-accent text-white hover:bg-accent/90 font-bold px-10 h-14 rounded-xl shadow-lg shadow-accent/20 transition-all"
           >
             {isLoading ? "RESEARCHING..." : "SEARCH INTEL"}
           </Button>
         </div>
       </div>
 
-      <div className="flex-1 overflow-y-auto p-8 custom-scrollbar">
+      <div className="flex-1 overflow-y-auto p-6 lg:p-10 no-scrollbar">
         {isLoading ? (
-          <div className="h-full flex flex-col items-center justify-center space-y-4">
+          <div className="h-full flex flex-col items-center justify-center space-y-6">
             <motion.div 
               animate={{ scale: [1, 1.1, 1], opacity: [0.5, 1, 0.5] }}
               transition={{ duration: 1.5, repeat: Infinity }}
-              className="w-16 h-16 rounded-full border-2 border-terminal-green/20 flex items-center justify-center"
+              className="w-20 h-20 rounded-3xl bg-accent/10 flex items-center justify-center border border-accent/20"
             >
-              <Cpu className="w-8 h-8 text-terminal-green" />
+              <Cpu className="w-10 h-10 text-accent" />
             </motion.div>
-            <p className="text-[10px] font-mono text-terminal-green uppercase tracking-widest animate-pulse">Querying Global Vulnerability Databases...</p>
+            <p className="text-xs font-medium text-accent uppercase tracking-[0.2em] animate-pulse">Querying Global Databases...</p>
           </div>
         ) : results ? (
           <motion.div
@@ -69,28 +77,40 @@ export const CVEIntelligence: React.FC = () => {
             animate={{ opacity: 1, y: 0 }}
             className="max-w-4xl mx-auto"
           >
-            <div className="p-8 rounded-2xl bg-white/5 border border-white/10 terminal-glow">
-              <div className="flex items-center justify-between mb-8 pb-4 border-b border-white/10">
-                <div className="flex items-center gap-2">
-                  <Activity className="w-4 h-4 text-terminal-cyan" />
-                  <span className="text-[10px] font-mono text-terminal-cyan uppercase tracking-widest">Intelligence Report</span>
+            <div className="p-10 pro-card">
+              <div className="flex items-center justify-between mb-10 pb-6 border-b border-obsidian-border">
+                <div className="flex items-center gap-3">
+                  <Activity className="w-5 h-5 text-accent" />
+                  <span className="text-xs font-bold text-text-primary uppercase tracking-widest">Intelligence Report</span>
                 </div>
-                <div className="flex items-center gap-2 text-[9px] font-mono text-terminal-text/30">
-                  <span>SOURCE: GEMINI-INTEL-V3</span>
-                  <ExternalLink className="w-3 h-3" />
+                <div className="flex items-center gap-6">
+                  {isCVEQuery && onWeaponize && (
+                    <Button 
+                      size="sm" 
+                      onClick={() => onWeaponize(query)}
+                      className="bg-red-500 hover:bg-red-600 text-white font-bold text-[10px] h-8 px-4 rounded-lg shadow-lg shadow-red-500/20"
+                    >
+                      <Cpu className="w-3.5 h-3.5 mr-2" />
+                      WEAPONIZE
+                    </Button>
+                  )}
+                  <div className="flex items-center gap-2 text-[10px] font-bold text-text-secondary/40">
+                    <span>SOURCE: GEMINI-INTEL-V3</span>
+                    <ExternalLink className="w-3.5 h-3.5" />
+                  </div>
                 </div>
               </div>
-              <div className="markdown-body text-sm leading-relaxed">
+              <div className="markdown-body text-base leading-relaxed">
                 <ReactMarkdown>{results}</ReactMarkdown>
               </div>
             </div>
           </motion.div>
         ) : (
-          <div className="h-full flex flex-col items-center justify-center text-center space-y-6 opacity-20">
-            <ShieldAlert className="w-16 h-16" />
-            <div className="space-y-2">
-              <p className="text-xs font-mono uppercase tracking-widest">Awaiting Intelligence Query</p>
-              <p className="text-[10px] font-mono max-w-xs mx-auto">
+          <div className="h-full flex flex-col items-center justify-center text-center space-y-8 opacity-10">
+            <ShieldAlert className="w-24 h-24" />
+            <div className="space-y-3">
+              <p className="text-lg font-bold uppercase tracking-widest">Awaiting Intelligence Query</p>
+              <p className="text-sm font-medium max-w-sm mx-auto">
                 Enter a search term above to retrieve the latest vulnerability data and exploit intelligence.
               </p>
             </div>

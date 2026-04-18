@@ -2,16 +2,6 @@
 // Assumed Data Model
 // ===============================================================
 //
-// Collection: messages
-// Document ID: auto-generated
-// Fields:
-//   - content: string (required, 1-1000 chars) - The message text
-//   - userId: string (required) - UID of the sender
-//   - userName: string (required, 1-50 chars) - Display name of the sender
-//   - userPhoto: string (optional, URL) - Photo URL of the sender
-//   - role: string (required, enum: ['admin', 'user', 'system']) - Role of the sender
-//   - createdAt: timestamp (required) - Creation time
-//
 // Collection: users
 // Document ID: userId (UID)
 // Fields:
@@ -59,16 +49,6 @@ service cloud.firestore {
     // Domain Validators
     // ===============================================================
 
-    function isValidMessage(data) {
-      return data.keys().hasAll(['content', 'userId', 'userName', 'role', 'createdAt']) &&
-             data.keys().hasOnly(['content', 'userId', 'userName', 'userPhoto', 'role', 'createdAt']) &&
-             data.content is string && data.content.size() > 0 && data.content.size() <= 1000 &&
-             data.userId == request.auth.uid &&
-             data.userName is string && data.userName.size() > 0 && data.userName.size() <= 50 &&
-             data.role in ['admin', 'user', 'system'] &&
-             data.createdAt == request.time;
-    }
-
     function isValidUser(data) {
       return data.keys().hasAll(['uid', 'displayName', 'email', 'role']) &&
              data.keys().hasOnly(['uid', 'displayName', 'email', 'photoURL', 'role', 'lastSeen', 'xp', 'level', 'badges', 'completedCTFs']) &&
@@ -82,15 +62,40 @@ service cloud.firestore {
              (!('completedCTFs' in data) || data.completedCTFs is list);
     }
 
+    function isValidScenario(data) {
+      return data.keys().hasAll(['title', 'input', 'analysis', 'userId', 'createdAt']) &&
+             data.keys().hasOnly(['title', 'input', 'analysis', 'userId', 'createdAt']) &&
+             data.title is string && data.title.size() > 0 && data.title.size() <= 200 &&
+             data.input is string && data.input.size() > 0 && data.input.size() <= 2000 &&
+             data.analysis is string && data.analysis.size() > 0 && data.analysis.size() <= 10000 &&
+             data.userId == request.auth.uid &&
+             data.createdAt == request.time;
+    }
+
+    function isValidSecurityAudit(data) {
+      return data.keys().hasAll(['userId', 'mode', 'target', 'findings', 'createdAt']) &&
+             data.keys().hasOnly(['userId', 'mode', 'target', 'findings', 'createdAt']) &&
+             data.userId == request.auth.uid &&
+             data.mode in ['SAST', 'DAST'] &&
+             data.target is string && data.target.size() > 0 && data.target.size() <= 10000 &&
+             data.findings is list &&
+             data.createdAt == request.time;
+    }
+
+    function isValidRedTeamSession(data) {
+      return data.keys().hasAll(['userId', 'modelName', 'attackType', 'input', 'logs', 'createdAt']) &&
+             data.keys().hasOnly(['userId', 'modelName', 'attackType', 'input', 'logs', 'createdAt']) &&
+             data.userId == request.auth.uid &&
+             data.modelName is string &&
+             data.attackType is string &&
+             data.input is string && data.input.size() <= 5000 &&
+             data.logs is list &&
+             data.createdAt == request.time;
+    }
+
     // ===============================================================
     // Rules
     // ===============================================================
-
-    match /messages/{messageId} {
-      allow read: if isAuthenticated();
-      allow create: if isAuthenticated() && isValidMessage(request.resource.data);
-      allow update, delete: if isAdmin();
-    }
 
     match /users/{userId} {
       allow read: if isAuthenticated(); // Public profiles for War Room
@@ -107,6 +112,28 @@ service cloud.firestore {
     match /cve_cache/{cveId} {
       allow read: if isAuthenticated();
       allow write: if isAuthenticated(); // Allow users to cache CVE data
+    }
+
+    match /scenarios/{scenarioId} {
+      allow read: if isAuthenticated() && resource.data.userId == request.auth.uid;
+      allow create: if isAuthenticated() && isValidScenario(request.resource.data);
+      allow delete: if isAuthenticated() && resource.data.userId == request.auth.uid;
+    }
+
+    match /security_audits/{auditId} {
+      allow read: if isAuthenticated() && resource.data.userId == request.auth.uid;
+      allow create: if isAuthenticated() && isValidSecurityAudit(request.resource.data);
+      allow delete: if isAuthenticated() && resource.data.userId == request.auth.uid;
+    }
+
+    match /red_team_sessions/{sessionId} {
+      allow read: if isAuthenticated() && resource.data.userId == request.auth.uid;
+      allow create: if isAuthenticated() && isValidRedTeamSession(request.resource.data);
+      allow delete: if isAuthenticated() && resource.data.userId == request.auth.uid;
+    }
+
+    match /test/connection {
+      allow read: if true;
     }
 
     // Default deny

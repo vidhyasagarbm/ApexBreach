@@ -1,39 +1,5 @@
 {
   "entities": {
-    "Message": {
-      "title": "Message",
-      "description": "A chat message in the War Room",
-      "type": "object",
-      "properties": {
-        "content": {
-          "type": "string",
-          "description": "The text content of the message"
-        },
-        "userId": {
-          "type": "string",
-          "description": "The UID of the user who sent the message"
-        },
-        "userName": {
-          "type": "string",
-          "description": "The display name of the user"
-        },
-        "userPhoto": {
-          "type": "string",
-          "description": "The photo URL of the user"
-        },
-        "role": {
-          "type": "string",
-          "enum": ["admin", "user", "system"],
-          "description": "The role of the sender"
-        },
-        "createdAt": {
-          "type": "string",
-          "format": "date-time",
-          "description": "The timestamp when the message was created"
-        }
-      },
-      "required": ["content", "userId", "userName", "role", "createdAt"]
-    },
     "User": {
       "title": "User",
       "description": "A user profile in the system",
@@ -99,13 +65,49 @@
         "lastModifiedDate": { "type": "string" }
       },
       "required": ["cveId", "description"]
+    },
+    "Scenario": {
+      "title": "Scenario",
+      "description": "A saved hacking scenario analysis",
+      "type": "object",
+      "properties": {
+        "title": { "type": "string" },
+        "input": { "type": "string" },
+        "analysis": { "type": "string" },
+        "userId": { "type": "string" },
+        "createdAt": { "type": "string", "format": "date-time" }
+      },
+      "required": ["title", "input", "analysis", "userId", "createdAt"]
+    },
+    "SecurityAudit": {
+      "title": "Security Audit",
+      "description": "A saved SAST or DAST scan result",
+      "type": "object",
+      "properties": {
+        "userId": { "type": "string" },
+        "mode": { "type": "string", "enum": ["SAST", "DAST"] },
+        "target": { "type": "string", "description": "Code snippet or URL" },
+        "findings": { "type": "array" },
+        "createdAt": { "type": "string", "format": "date-time" }
+      },
+      "required": ["userId", "mode", "target", "findings", "createdAt"]
+    },
+    "RedTeamSession": {
+      "title": "Red Team Session",
+      "description": "A saved AI Red Teaming session",
+      "type": "object",
+      "properties": {
+        "userId": { "type": "string" },
+        "modelName": { "type": "string" },
+        "attackType": { "type": "string" },
+        "input": { "type": "string" },
+        "logs": { "type": "array" },
+        "createdAt": { "type": "string", "format": "date-time" }
+      },
+      "required": ["userId", "modelName", "attackType", "input", "logs", "createdAt"]
     }
   },
   "firestore": {
-    "/messages/{messageId}": {
-      "schema": "Message",
-      "description": "Global chat messages for the War Room"
-    },
     "/users/{userId}": {
       "schema": "User",
       "description": "User profiles and roles"
@@ -113,6 +115,18 @@
     "/cve_cache/{cveId}": {
       "schema": "CVE",
       "description": "Cache for CVE data"
+    },
+    "/scenarios/{scenarioId}": {
+      "schema": "Scenario",
+      "description": "Saved hacking scenarios"
+    },
+    "/security_audits/{auditId}": {
+      "schema": "SecurityAudit",
+      "description": "Saved security audits"
+    },
+    "/red_team_sessions/{sessionId}": {
+      "schema": "RedTeamSession",
+      "description": "Saved red team sessions"
     }
   }
 }

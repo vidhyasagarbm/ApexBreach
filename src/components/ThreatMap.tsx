@@ -3,6 +3,7 @@ import * as d3 from 'd3';
 import * as topojson from 'topojson-client';
 import { motion, AnimatePresence } from 'motion/react';
 import { Globe, ShieldAlert, Zap, Target, Activity } from 'lucide-react';
+import { Badge } from '@/components/ui/badge';
 
 const CITIES = [
   { name: 'New York', country: 'USA', coords: [-74.006, 40.7128] },
@@ -31,6 +32,55 @@ const ATTACK_TYPES = [
   'DDoS', 'SQL Injection', 'Brute Force', 'Phishing', 'Malware', 'Exploit', 'Ransomware'
 ];
 
+interface Incident {
+  id: string;
+  title: string;
+  location: string;
+  coords: [number, number];
+  severity: 'low' | 'medium' | 'high' | 'critical';
+  description: string;
+  type: string;
+}
+
+const LIVE_INCIDENTS: Incident[] = [
+  {
+    id: 'inc-1',
+    title: 'SolarWinds Supply Chain Attack',
+    location: 'Washington D.C., USA',
+    coords: [-77.0369, 38.9072],
+    severity: 'critical',
+    description: 'Sophisticated supply chain compromise impacting multiple government agencies and private organizations. Attributed to APT29.',
+    type: 'Supply Chain'
+  },
+  {
+    id: 'inc-2',
+    title: 'WannaCry Ransomware Outbreak',
+    location: 'London, UK',
+    coords: [-0.1278, 51.5074],
+    severity: 'high',
+    description: 'Global ransomware attack targeting unpatched Windows systems via EternalBlue exploit. Massive impact on healthcare systems.',
+    type: 'Ransomware'
+  },
+  {
+    id: 'inc-3',
+    title: 'Log4Shell Vulnerability',
+    location: 'Singapore',
+    coords: [103.8198, 1.3521],
+    severity: 'critical',
+    description: 'Critical RCE vulnerability in Apache Log4j library impacting millions of applications. Actively exploited by multiple threat actors.',
+    type: 'Vulnerability'
+  },
+  {
+    id: 'inc-4',
+    title: 'Operation Aurora',
+    location: 'Beijing, China',
+    coords: [116.4074, 39.9042],
+    severity: 'high',
+    description: 'Highly targeted cyber attack originating from China against dozens of major US companies, including Google and Adobe.',
+    type: 'APT'
+  }
+];
+
 interface Attack {
   id: string;
   source: typeof CITIES[0];
@@ -43,6 +93,7 @@ interface Attack {
 export const ThreatMap: React.FC = () => {
   const svgRef = useRef<SVGSVGElement>(null);
   const [attacks, setAttacks] = useState<Attack[]>([]);
+  const [selectedIncident, setSelectedIncident] = useState<Incident | null>(null);
   const [stats, setStats] = useState({
     total: 0,
     ddos: 0,
@@ -88,6 +139,51 @@ export const ThreatMap: React.FC = () => {
         .attr('fill', '#0a1a0a')
         .attr('stroke', '#1a3a1a')
         .attr('stroke-width', 0.5);
+
+      // Draw Live Incident Markers
+      const incidentGroup = svg.append('g').attr('class', 'incidents');
+      
+      LIVE_INCIDENTS.forEach(inc => {
+        const pos = projection(inc.coords);
+        if (pos) {
+          const marker = incidentGroup.append('g')
+            .attr('class', 'incident-marker')
+            .style('cursor', 'pointer')
+            .on('click', () => setSelectedIncident(inc));
+
+          // Outer pulse
+          marker.append('circle')
+            .attr('cx', pos[0])
+            .attr('cy', pos[1])
+            .attr('r', 8)
+            .attr('fill', inc.severity === 'critical' ? '#ff0000' : '#ff6600')
+            .style('opacity', 0.3)
+            .append('animate')
+            .attr('attributeName', 'r')
+            .attr('values', '8;15;8')
+            .attr('dur', '2s')
+            .attr('repeatCount', 'indefinite');
+
+          // Inner dot
+          marker.append('circle')
+            .attr('cx', pos[0])
+            .attr('cy', pos[1])
+            .attr('r', 4)
+            .attr('fill', inc.severity === 'critical' ? '#ff0000' : '#ff6600')
+            .style('filter', 'drop-shadow(0 0 5px rgba(255,0,0,0.8))');
+
+          // Label
+          marker.append('text')
+            .attr('x', pos[0])
+            .attr('y', pos[1] + 20)
+            .attr('text-anchor', 'middle')
+            .attr('fill', '#ffffff')
+            .attr('font-size', '8px')
+            .attr('font-family', 'monospace')
+            .style('opacity', 0.6)
+            .text(inc.type);
+        }
+      });
     });
 
     // Attack simulation interval
@@ -130,7 +226,7 @@ export const ThreatMap: React.FC = () => {
           .attr('y', sourcePos[1] - 10)
           .attr('text-anchor', 'middle')
           .attr('fill', '#00ff00')
-          .attr('font-size', '10px')
+          .attr('font-size', '12px')
           .attr('font-family', 'monospace')
           .style('opacity', 0)
           .text(`${source.country}`);
@@ -140,7 +236,7 @@ export const ThreatMap: React.FC = () => {
           .attr('y', targetPos[1] - 10)
           .attr('text-anchor', 'middle')
           .attr('fill', severity === 'critical' ? '#ff0000' : '#00ff00')
-          .attr('font-size', '10px')
+          .attr('font-size', '12px')
           .attr('font-family', 'monospace')
           .style('opacity', 0)
           .text(`${target.country}`);
@@ -237,24 +333,24 @@ export const ThreatMap: React.FC = () => {
   }, []);
 
   return (
-    <div className="flex flex-col h-full bg-black/40 rounded-lg border border-terminal-border overflow-hidden relative">
-      <div className="p-4 border-b border-terminal-border flex items-center justify-between bg-black/20">
+    <div className="flex flex-col h-full bg-obsidian-card rounded-2xl border border-obsidian-border overflow-hidden relative">
+      <div className="p-6 border-b border-obsidian-border flex items-center justify-between bg-white/5 backdrop-blur-xl">
         <div className="flex items-center gap-3">
-          <Globe className="w-5 h-5 text-terminal-green animate-pulse" />
-          <h2 className="text-sm font-mono font-bold text-terminal-green uppercase tracking-widest">Live Cyber Threat Map</h2>
+          <Globe className="w-5 h-5 text-accent animate-pulse" />
+          <h2 className="text-base font-bold text-text-primary uppercase tracking-widest">Global Threat Intelligence</h2>
         </div>
-        <div className="flex gap-4 text-[10px] font-mono">
+        <div className="flex gap-4 text-xs font-mono">
           <div className="flex items-center gap-1.5">
-            <span className="w-2 h-2 rounded-full bg-terminal-green" />
-            <span className="text-terminal-text/60">LOW/MED</span>
+            <span className="w-2 h-2 rounded-full bg-accent" />
+            <span className="text-text-secondary">LOW/MED</span>
           </div>
           <div className="flex items-center gap-1.5">
             <span className="w-2 h-2 rounded-full bg-orange-500" />
-            <span className="text-terminal-text/60">HIGH</span>
+            <span className="text-text-secondary">HIGH</span>
           </div>
           <div className="flex items-center gap-1.5">
             <span className="w-2 h-2 rounded-full bg-red-500" />
-            <span className="text-terminal-text/60">CRITICAL</span>
+            <span className="text-text-secondary">CRITICAL</span>
           </div>
         </div>
       </div>
@@ -295,7 +391,7 @@ export const ThreatMap: React.FC = () => {
               <div className="space-y-1.5">
                 <div>
                   <div className="text-[8px] font-mono text-terminal-text/40 uppercase">Source</div>
-                  <div className="text-[10px] font-mono text-terminal-cyan">{tooltip.content.source}</div>
+                  <div className="text-[10px] font-mono text-terminal-green">{tooltip.content.source}</div>
                 </div>
                 <div>
                   <div className="text-[8px] font-mono text-terminal-text/40 uppercase">Target</div>
@@ -307,32 +403,32 @@ export const ThreatMap: React.FC = () => {
         </AnimatePresence>
         
         {/* Overlay Stats */}
-        <div className="absolute top-4 left-4 space-y-2">
-          <div className="bg-black/60 border border-terminal-border p-3 rounded backdrop-blur-sm">
-            <div className="text-[10px] font-mono text-terminal-text/40 mb-1 uppercase">Total Attacks Detected</div>
-            <div className="text-xl font-mono font-bold text-terminal-green">{stats.total.toLocaleString()}</div>
+        <div className="absolute top-4 left-4 right-4 sm:right-auto space-y-2">
+          <div className="bg-black/60 border border-obsidian-border p-3 rounded-xl backdrop-blur-sm">
+            <div className="text-[10px] font-mono text-text-secondary/50 mb-1 uppercase tracking-widest">Total Attacks Detected</div>
+            <div className="text-xl lg:text-2xl font-mono font-bold text-accent">{stats.total.toLocaleString()}</div>
           </div>
           <div className="grid grid-cols-3 gap-2">
             <div className="bg-black/60 border border-terminal-border p-2 rounded backdrop-blur-sm">
-              <div className="text-[8px] font-mono text-terminal-text/40 uppercase">DDoS</div>
-              <div className="text-xs font-mono text-terminal-cyan">{stats.ddos}</div>
+              <div className="text-[8px] lg:text-[10px] font-mono text-terminal-text/40 uppercase">DDoS</div>
+              <div className="text-xs lg:text-sm font-mono text-terminal-green">{stats.ddos}</div>
             </div>
             <div className="bg-black/60 border border-terminal-border p-2 rounded backdrop-blur-sm">
-              <div className="text-[8px] font-mono text-terminal-text/40 uppercase">Malware</div>
-              <div className="text-xs font-mono text-terminal-cyan">{stats.malware}</div>
+              <div className="text-[8px] lg:text-[10px] font-mono text-terminal-text/40 uppercase">Malware</div>
+              <div className="text-xs lg:text-sm font-mono text-terminal-green">{stats.malware}</div>
             </div>
             <div className="bg-black/60 border border-terminal-border p-2 rounded backdrop-blur-sm">
-              <div className="text-[8px] font-mono text-terminal-text/40 uppercase">Exploit</div>
-              <div className="text-xs font-mono text-terminal-cyan">{stats.exploit}</div>
+              <div className="text-[8px] lg:text-[10px] font-mono text-terminal-text/40 uppercase">Exploit</div>
+              <div className="text-xs lg:text-sm font-mono text-terminal-green">{stats.exploit}</div>
             </div>
           </div>
         </div>
 
         {/* Live Feed */}
-        <div className="absolute top-4 right-4 w-64 h-64 bg-black/60 border border-terminal-border rounded backdrop-blur-sm overflow-hidden flex flex-col">
+        <div className="absolute bottom-4 left-4 right-4 sm:top-4 sm:left-auto sm:right-4 sm:bottom-auto sm:w-64 h-48 sm:h-64 bg-black/60 border border-terminal-border rounded backdrop-blur-sm overflow-hidden flex flex-col">
           <div className="p-2 border-b border-terminal-border bg-black/40 flex items-center gap-2">
             <Activity className="w-3 h-3 text-terminal-green" />
-            <span className="text-[10px] font-mono font-bold text-terminal-green uppercase">Live Attack Feed</span>
+            <span className="text-[10px] lg:text-xs font-mono font-bold text-terminal-green uppercase">Live Attack Feed</span>
           </div>
           <div className="flex-1 overflow-y-auto p-2 space-y-2 custom-scrollbar">
             <AnimatePresence initial={false}>
@@ -342,7 +438,7 @@ export const ThreatMap: React.FC = () => {
                   initial={{ opacity: 0, x: 20 }}
                   animate={{ opacity: 1, x: 0 }}
                   exit={{ opacity: 0, scale: 0.95 }}
-                  className="p-2 bg-white/5 border border-white/10 rounded text-[9px] font-mono"
+                  className="p-2 bg-white/5 border border-white/10 rounded text-xs font-mono"
                 >
                   <div className="flex justify-between items-start mb-1">
                     <span className={cn(
@@ -353,32 +449,88 @@ export const ThreatMap: React.FC = () => {
                     )}>
                       {attack.type}
                     </span>
-                    <span className="text-terminal-text/30">{attack.timestamp.toLocaleTimeString()}</span>
+                    <span className="text-[10px] text-terminal-text/30">{attack.timestamp.toLocaleTimeString()}</span>
                   </div>
-                  <div className="text-terminal-text/60">
-                    <span className="text-terminal-cyan">{attack.source.name}, {attack.source.country}</span>
+                  <div className="text-xs text-terminal-text/60">
+                    <span className="text-terminal-green">{attack.source.name}, {attack.source.country}</span>
                     <span className="mx-1">→</span>
-                    <span className="text-terminal-cyan">{attack.target.name}, {attack.target.country}</span>
+                    <span className="text-terminal-green">{attack.target.name}, {attack.target.country}</span>
                   </div>
                 </motion.div>
               ))}
             </AnimatePresence>
           </div>
         </div>
+
+        {/* Incident Detail Overlay */}
+        <AnimatePresence>
+          {selectedIncident && (
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: 20 }}
+              className="absolute bottom-4 left-4 right-4 sm:left-auto sm:right-4 sm:w-80 bg-black/95 border border-terminal-border rounded-lg shadow-2xl backdrop-blur-xl overflow-hidden z-50"
+            >
+              <div className="p-3 border-b border-terminal-border bg-terminal-green/10 flex items-center justify-between">
+                <div className="flex items-center gap-2">
+                  <ShieldAlert className="w-4 h-4 text-terminal-green" />
+                  <span className="text-xs font-mono font-bold text-terminal-green uppercase">Incident Intelligence</span>
+                </div>
+                <button 
+                  onClick={() => setSelectedIncident(null)}
+                  className="text-terminal-text/40 hover:text-terminal-green transition-colors"
+                >
+                  <Activity className="w-4 h-4 rotate-45" />
+                </button>
+              </div>
+              <div className="p-4 space-y-4">
+                <div>
+                  <div className="flex items-center justify-between mb-1">
+                    <h3 className="text-sm font-bold text-terminal-text">{selectedIncident.title}</h3>
+                    <Badge className={cn(
+                      "text-[10px] font-mono uppercase",
+                      selectedIncident.severity === 'critical' ? 'bg-red-500/20 text-red-500' : 'bg-orange-500/20 text-orange-500'
+                    )}>
+                      {selectedIncident.severity}
+                    </Badge>
+                  </div>
+                  <div className="text-[10px] font-mono text-terminal-text/40 uppercase">{selectedIncident.location}</div>
+                </div>
+                
+                <div className="p-3 bg-white/5 rounded border border-white/5">
+                  <p className="text-xs text-terminal-text/70 leading-relaxed italic">
+                    "{selectedIncident.description}"
+                  </p>
+                </div>
+
+                <div className="flex items-center gap-4">
+                  <div>
+                    <div className="text-[8px] font-mono text-terminal-text/30 uppercase">Vector</div>
+                    <div className="text-[10px] font-mono text-terminal-green">{selectedIncident.type}</div>
+                  </div>
+                  <div>
+                    <div className="text-[8px] font-mono text-terminal-text/30 uppercase">Status</div>
+                    <div className="text-[10px] font-mono text-terminal-green">ANALYZED</div>
+                  </div>
+                </div>
+              </div>
+            </motion.div>
+          )}
+        </AnimatePresence>
       </div>
 
-      <div className="p-3 border-t border-terminal-border bg-black/20 flex items-center justify-between">
+      <div className="p-3 border-t border-terminal-border bg-black/20 flex flex-col sm:flex-row items-center justify-between gap-2">
         <div className="flex items-center gap-4">
           <div className="flex items-center gap-2">
-            <Zap className="w-3 h-3 text-terminal-cyan" />
-            <span className="text-[10px] font-mono text-terminal-text/40">SENSORS: <span className="text-terminal-cyan">ONLINE</span></span>
+            <Zap className="w-3 h-3 text-terminal-green" />
+            <span className="text-[10px] lg:text-xs font-mono text-terminal-text/40">SENSORS: <span className="text-terminal-green">ONLINE</span></span>
           </div>
           <div className="flex items-center gap-2">
             <Target className="w-3 h-3 text-terminal-green" />
-            <span className="text-[10px] font-mono text-terminal-text/40">THREAT LEVEL: <span className="text-terminal-green">ELEVATED</span></span>
+            <span className="text-[10px] lg:text-xs font-mono text-terminal-text/40">THREAT: <span className="text-terminal-green">ELEVATED</span></span>
           </div>
         </div>
-        <div className="text-[10px] font-mono text-terminal-text/20 italic">
+        <div className="text-[10px] font-mono text-terminal-text/20 italic hidden xs:block">
           Real-time global telemetry active
         </div>
       </div>

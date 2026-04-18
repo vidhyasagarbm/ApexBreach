@@ -1063,6 +1063,78 @@ export const TTP_DATA: TTP[] = [
     ]
   },
   {
+    id: "dark-web-ops",
+    name: "Dark Web Operations",
+    level: "Level 18: Dark Web",
+    description: "Operating within the darknet requires specialized tools and protocols to maintain anonymity and access hidden services. This phase involves navigating Tor, I2P, and other decentralized networks for secure communication, data drop-offs, and intelligence gathering.",
+    techniques: [
+      {
+        id: "tor-anonymity",
+        name: "Tor Network & Proxychains",
+        level: "Beginner",
+        description: "Tor (The Onion Router) is a free and open-source software for enabling anonymous communication. Proxychains is a tool that forces any TCP connection made by any given application to follow through proxy like TOR or any other SOCKS4, SOCKS5 or HTTP(S) proxies.",
+        kaliTool: "Tor / Proxychains",
+        procedures: [
+          {
+            command: "sudo service tor start",
+            explanation: "Starts the Tor service on the local machine."
+          },
+          {
+            command: "proxychains nmap -sT -PN <target_ip>",
+            explanation: "Runs an Nmap scan through the Tor network to hide the attacker's source IP address."
+          }
+        ],
+        chaining: "Use Proxychains with almost any CLI tool (like 'SQLmap' or 'Hydra') to perform attacks anonymously."
+      },
+      {
+        id: "onion-service-recon",
+        name: "Onion Service Enumeration",
+        level: "Advanced",
+        description: "Hidden services (Onion services) are only accessible via the Tor network. Enumerating these services requires specialized scanners that can handle the .onion TLD and the latency of the Tor network.",
+        kaliTool: "OnionScan / Tor-browser",
+        procedures: [
+          {
+            command: "onionscan <onion_address>.onion",
+            explanation: "Scans a hidden service for security misconfigurations and information leaks (like EXIF data or server headers)."
+          }
+        ],
+        chaining: "Identify vulnerabilities in hidden services, then use 'Tor-enabled' tools to exploit them."
+      },
+      {
+        id: "darknet-osint",
+        name: "Darknet OSINT",
+        level: "Advanced",
+        description: "Gathering intelligence from darknet forums, marketplaces, and paste sites. This involves monitoring for leaked credentials, zero-day exploits for sale, and discussions about target organizations.",
+        kaliTool: "Hunchly / Custom Scrapers",
+        procedures: [
+          {
+            command: "Monitoring 'Ahmia' or 'Torch' for target keywords.",
+            explanation: "Using darknet search engines to find mentions of a target organization or its assets."
+          }
+        ],
+        chaining: "Use leaked credentials found on the dark web for 'Credential Stuffing' attacks on the target's public infrastructure."
+      },
+      {
+        id: "pgp-secure-comms",
+        name: "PGP Encryption & Signing",
+        level: "Beginner",
+        description: "Pretty Good Privacy (PGP) is an encryption program that provides cryptographic privacy and authentication for data communication. It is the standard for secure communication on the dark web.",
+        kaliTool: "GnuPG (gpg)",
+        procedures: [
+          {
+            command: "gpg --import public_key.asc",
+            explanation: "Imports a target's public key to send them an encrypted message."
+          },
+          {
+            command: "gpg --encrypt --recipient <email> message.txt",
+            explanation: "Encrypts a file so that only the recipient with the corresponding private key can read it."
+          }
+        ],
+        chaining: "Use PGP to securely receive exfiltrated data or to communicate with 'Dead Drops' without revealing the content to intermediaries."
+      }
+    ]
+  },
+  {
     id: "god-level",
     name: "God Level: Elite Ops",
     level: "Level 99: Ascended",

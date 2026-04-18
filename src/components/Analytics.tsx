@@ -35,29 +35,29 @@ const REGIONAL_RISK = [
 
 export const AnalyticsDashboard: React.FC = () => {
   return (
-    <div className="h-full overflow-y-auto custom-scrollbar p-8 space-y-8">
-      <div className="flex items-center justify-between">
+    <div className="h-full overflow-y-auto no-scrollbar p-4 lg:p-8 space-y-6 lg:space-y-8">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
-          <h2 className="text-2xl font-bold text-terminal-green uppercase tracking-tight">Global Threat Analytics</h2>
-          <p className="text-sm text-terminal-text/50 font-mono">Real-time data visualization of simulated global cyber activity</p>
+          <h2 className="text-xl lg:text-2xl font-bold text-terminal-green uppercase tracking-tight">Global Threat Analytics</h2>
+          <p className="text-xs lg:text-base text-terminal-text/50 font-mono">Real-time data visualization of simulated global cyber activity</p>
         </div>
         <div className="flex items-center gap-4">
-          <div className="px-4 py-2 bg-black/40 border border-terminal-border rounded-lg flex items-center gap-3">
-            <Activity className="w-4 h-4 text-terminal-green animate-pulse" />
+          <div className="px-3 lg:px-4 py-1.5 lg:py-2 bg-black/40 border border-terminal-border rounded-lg flex items-center gap-3">
+            <Activity className="w-3.5 h-3.5 lg:w-4 lg:h-4 text-terminal-green animate-pulse" />
             <div className="flex flex-col">
               <span className="text-[10px] text-terminal-text/40 uppercase font-mono">System Health</span>
-              <span className="text-xs text-terminal-green font-mono">OPTIMAL</span>
+              <span className="text-xs lg:text-sm text-terminal-green font-mono">OPTIMAL</span>
             </div>
           </div>
         </div>
       </div>
 
       {/* Stats Grid */}
-      <div className="grid grid-cols-4 gap-6">
+      <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 lg:gap-6">
         {[
           { label: 'Total Attacks', value: '1.2M', icon: AlertTriangle, color: 'text-red-500' },
           { label: 'Mitigated', value: '98.4%', icon: Shield, color: 'text-terminal-green' },
-          { label: 'Avg Latency', value: '42ms', icon: Zap, color: 'text-terminal-cyan' },
+          { label: 'Avg Latency', value: '42ms', icon: Zap, color: 'text-terminal-green' },
           { label: 'Active Nodes', value: '14,205', icon: Globe, color: 'text-purple-400' },
         ].map((stat, i) => (
           <motion.div
@@ -75,24 +75,24 @@ export const AnalyticsDashboard: React.FC = () => {
             </div>
             <div className="space-y-1">
               <p className="text-[10px] font-mono text-terminal-text/40 uppercase tracking-widest">{stat.label}</p>
-              <p className="text-2xl font-bold font-mono tracking-tighter">{stat.value}</p>
+              <p className="text-xl lg:text-3xl font-bold font-mono tracking-tighter">{stat.value}</p>
             </div>
           </motion.div>
         ))}
       </div>
 
-      <div className="grid grid-cols-3 gap-8">
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 lg:gap-8">
         {/* Main Trend Chart */}
-        <Card className="col-span-2 p-6 bg-black/40 border-terminal-border">
-          <div className="flex items-center justify-between mb-8">
-            <h3 className="text-xs font-mono font-bold uppercase tracking-widest text-terminal-text/60">Attack Frequency (24h)</h3>
-            <div className="flex items-center gap-4 text-[10px] font-mono">
+        <Card className="lg:col-span-2 p-4 lg:p-6 bg-black/40 border-terminal-border">
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between mb-8 gap-4">
+            <h3 className="text-[10px] lg:text-sm font-mono font-bold uppercase tracking-widest text-terminal-text/60">Attack Frequency (24h)</h3>
+            <div className="flex items-center gap-4 text-[10px] lg:text-xs font-mono">
               <div className="flex items-center gap-2">
                 <div className="w-2 h-2 rounded-full bg-terminal-green" />
                 <span>TOTAL ATTACKS</span>
               </div>
               <div className="flex items-center gap-2">
-                <div className="w-2 h-2 rounded-full bg-terminal-cyan" />
+                <div className="w-2 h-2 rounded-full bg-terminal-green/50" />
                 <span>BLOCKED</span>
               </div>
             </div>
@@ -114,19 +114,19 @@ export const AnalyticsDashboard: React.FC = () => {
                 <XAxis 
                   dataKey="time" 
                   stroke="#4b5563" 
-                  fontSize={10} 
+                  fontSize={12} 
                   tickLine={false} 
                   axisLine={false} 
                 />
                 <YAxis 
                   stroke="#4b5563" 
-                  fontSize={10} 
+                  fontSize={12} 
                   tickLine={false} 
                   axisLine={false} 
                   tickFormatter={(value) => `${value}`}
                 />
                 <Tooltip 
-                  contentStyle={{ backgroundColor: '#000', border: '1px solid #374151', fontSize: '10px' }}
+                  contentStyle={{ backgroundColor: '#000', border: '1px solid #374151', fontSize: '12px' }}
                   itemStyle={{ color: '#10b981' }}
                 />
                 <Area 
@@ -140,8 +140,8 @@ export const AnalyticsDashboard: React.FC = () => {
                 <Area 
                   type="monotone" 
                   dataKey="blocked" 
-                  stroke="#06b6d4" 
-                  fillOpacity={1} 
+                  stroke="#00FF41" 
+                  fillOpacity={0.5} 
                   fill="url(#colorBlocked)" 
                   strokeWidth={2}
                 />
@@ -151,8 +151,8 @@ export const AnalyticsDashboard: React.FC = () => {
         </Card>
 
         {/* Attack Type Distribution */}
-        <Card className="p-6 bg-black/40 border-terminal-border">
-          <h3 className="text-xs font-mono font-bold uppercase tracking-widest text-terminal-text/60 mb-8">Attack Vectors</h3>
+        <Card className="p-4 lg:p-6 bg-black/40 border-terminal-border">
+          <h3 className="text-[10px] lg:text-sm font-mono font-bold uppercase tracking-widest text-terminal-text/60 mb-8">Attack Vectors</h3>
           <div className="h-[250px] w-full">
             <ResponsiveContainer width="100%" height="100%">
               <PieChart>
@@ -170,14 +170,14 @@ export const AnalyticsDashboard: React.FC = () => {
                   ))}
                 </Pie>
                 <Tooltip 
-                  contentStyle={{ backgroundColor: '#000', border: '1px solid #374151', fontSize: '10px' }}
+                  contentStyle={{ backgroundColor: '#000', border: '1px solid #374151', fontSize: '12px' }}
                 />
               </PieChart>
             </ResponsiveContainer>
           </div>
           <div className="space-y-2 mt-4">
             {ATTACK_TYPES.map((type, i) => (
-              <div key={i} className="flex items-center justify-between text-[10px] font-mono">
+              <div key={i} className="flex items-center justify-between text-xs font-mono">
                 <div className="flex items-center gap-2">
                   <div className="w-1.5 h-1.5 rounded-full" style={{ backgroundColor: type.color }} />
                   <span className="text-terminal-text/60">{type.name}</span>
@@ -189,10 +189,10 @@ export const AnalyticsDashboard: React.FC = () => {
         </Card>
       </div>
 
-      <div className="grid grid-cols-2 gap-8">
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 lg:gap-8">
         {/* Regional Risk Bar Chart */}
-        <Card className="p-6 bg-black/40 border-terminal-border">
-          <h3 className="text-xs font-mono font-bold uppercase tracking-widest text-terminal-text/60 mb-8">Regional Risk Index</h3>
+        <Card className="p-4 lg:p-6 bg-black/40 border-terminal-border">
+          <h3 className="text-[10px] lg:text-sm font-mono font-bold uppercase tracking-widest text-terminal-text/60 mb-8">Regional Risk Index</h3>
           <div className="h-[200px] w-full">
             <ResponsiveContainer width="100%" height="100%">
               <BarChart data={REGIONAL_RISK} layout="vertical">
@@ -201,14 +201,14 @@ export const AnalyticsDashboard: React.FC = () => {
                   dataKey="region" 
                   type="category" 
                   stroke="#4b5563" 
-                  fontSize={10} 
+                  fontSize={12} 
                   width={100}
                   axisLine={false}
                   tickLine={false}
                 />
                 <Tooltip 
                   cursor={{ fill: 'rgba(255,255,255,0.05)' }}
-                  contentStyle={{ backgroundColor: '#000', border: '1px solid #374151', fontSize: '10px' }}
+                  contentStyle={{ backgroundColor: '#000', border: '1px solid #374151', fontSize: '12px' }}
                 />
                 <Bar dataKey="risk" fill="#10b981" radius={[0, 4, 4, 0]} barSize={12} />
               </BarChart>
@@ -217,8 +217,8 @@ export const AnalyticsDashboard: React.FC = () => {
         </Card>
 
         {/* Live Activity Feed (Mini) */}
-        <Card className="p-6 bg-black/40 border-terminal-border">
-          <h3 className="text-xs font-mono font-bold uppercase tracking-widest text-terminal-text/60 mb-6">System Log Activity</h3>
+        <Card className="p-4 lg:p-6 bg-black/40 border-terminal-border">
+          <h3 className="text-[10px] lg:text-sm font-mono font-bold uppercase tracking-widest text-terminal-text/60 mb-6">System Log Activity</h3>
           <div className="space-y-4">
             {[
               { time: '11:02:15', event: 'DDoS Mitigation triggered in ASIA-EAST1', status: 'RESOLVED' },
@@ -226,12 +226,12 @@ export const AnalyticsDashboard: React.FC = () => {
               { time: '11:00:05', event: 'New Zero-Day signature added to database', status: 'UPDATED' },
               { time: '10:58:12', event: 'Global sync completed across 14 nodes', status: 'SUCCESS' },
             ].map((log, i) => (
-              <div key={i} className="flex items-start gap-4 text-[10px] font-mono border-b border-white/5 pb-3 last:border-0">
+              <div key={i} className="flex items-start gap-4 text-xs font-mono border-b border-white/5 pb-3 last:border-0">
                 <span className="text-terminal-text/30 shrink-0">{log.time}</span>
                 <span className="flex-1 text-terminal-text/70">{log.event}</span>
                 <span className={cn(
                   "shrink-0 font-bold",
-                  log.status === 'RESOLVED' || log.status === 'SUCCESS' ? "text-terminal-green" : "text-terminal-cyan"
+                  log.status === 'RESOLVED' || log.status === 'SUCCESS' ? "text-terminal-green" : "text-terminal-green/60"
                 )}>{log.status}</span>
               </div>
             ))}
