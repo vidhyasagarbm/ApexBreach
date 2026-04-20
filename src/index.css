@@ -21,9 +21,16 @@
   --color-terminal-bg: #050505;
 }
 
+html, body {
+  height: 100vh;
+  margin: 0;
+  padding: 0;
+  overflow: hidden;
+}
+
 @layer base {
   body {
-    @apply bg-obsidian-bg text-text-primary font-sans antialiased;
+    @apply bg-obsidian-bg text-text-primary font-sans antialiased h-[100vh];
     background-image: 
       radial-gradient(circle at 50% -20%, rgba(0, 255, 65, 0.05) 0%, transparent 70%);
   }
@@ -63,17 +70,30 @@
     100% { bottom: -100px; }
   }
 
+  .custom-scrollbar {
+    scrollbar-width: thin;
+    scrollbar-color: rgba(0, 255, 65, 0.4) transparent;
+    overscroll-behavior: contain;
+  }
+
   .custom-scrollbar::-webkit-scrollbar {
-    width: 5px;
-    height: 5px;
+    width: 6px;
+    height: 6px;
   }
 
   .custom-scrollbar::-webkit-scrollbar-track {
-    @apply bg-transparent;
+    background: transparent;
   }
 
   .custom-scrollbar::-webkit-scrollbar-thumb {
-    @apply bg-white/10 rounded-full hover:bg-accent/40 transition-colors;
+    background: rgba(0, 255, 65, 0.4);
+    border-radius: 10px;
+    border: 1px solid rgba(0, 255, 65, 0.1);
+    background-clip: padding-box;
+  }
+
+  .custom-scrollbar:hover::-webkit-scrollbar-thumb {
+    background: rgba(0, 255, 65, 0.6);
   }
 
   .no-scrollbar::-webkit-scrollbar {

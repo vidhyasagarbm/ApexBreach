@@ -67,9 +67,9 @@ export const LoadingScreen = ({ onComplete }: { onComplete: () => void }) => {
       {/* Matrix Rain Effect */}
       <div className="absolute inset-0 opacity-10 pointer-events-none overflow-hidden">
         <div className="flex justify-around w-full h-full">
-          {Array.from({ length: 20 }).map((_, i) => (
+          {Array.from({ length: window.innerWidth < 768 ? 10 : 20 }).map((_, i) => (
             <div key={i} className="flex flex-col gap-2 animate-matrix-fall" style={{ animationDelay: `${Math.random() * 5}s`, animationDuration: `${5 + Math.random() * 10}s` }}>
-              {Array.from({ length: 50 }).map((_, j) => (
+              {Array.from({ length: window.innerWidth < 768 ? 25 : 50 }).map((_, j) => (
                 <span key={j} className="text-[10px] text-accent font-bold">
                   {HEX_CHARS[Math.floor(Math.random() * HEX_CHARS.length)]}
                 </span>

@@ -22,6 +22,8 @@ import { cn } from '@/lib/utils';
 import ReactMarkdown from 'react-markdown';
 import { analyzeReconSurface } from '@/src/services/gemini';
 
+import { NeuralTargetGraph } from './NeuralTargetGraph';
+
 interface OSINTReconProps {
   onWeaponize?: (finding: string) => void;
 }
@@ -41,23 +43,23 @@ export const OSINTRecon: React.FC<OSINTReconProps> = ({ onWeaponize }) => {
 
   return (
     <div className="flex flex-col h-full bg-black/40">
-      <div className="p-6 border-b border-terminal-border bg-black/20">
-        <div className="flex items-center justify-between mb-8">
+      <div className="p-4 lg:p-6 border-b border-terminal-border bg-black/20">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between mb-6 lg:mb-8 gap-4">
           <div>
-            <h2 className="text-2xl font-bold text-terminal-text flex items-center gap-2">
-              <Globe className="w-6 h-6 text-emerald-500" />
+            <h2 className="text-xl lg:text-2xl font-bold text-terminal-text flex items-center gap-2">
+              <Globe className="w-5 h-5 lg:w-6 lg:h-6 text-emerald-500" />
               OSINT RECON ENGINE
             </h2>
-            <p className="text-xs font-mono text-terminal-text/40 mt-1 uppercase tracking-widest">Automated Attack Surface Mapping & Reconnaissance</p>
+            <p className="text-[10px] font-mono text-terminal-text/40 mt-1 uppercase tracking-widest">Automated Attack Surface Mapping</p>
           </div>
-          <div className="flex items-center gap-4">
+          <div className="flex items-center justify-between sm:justify-end gap-4 border-t sm:border-t-0 border-terminal-border pt-4 sm:pt-0">
             <div className="text-right">
-              <div className="text-[10px] font-mono text-terminal-text/30 uppercase">Active Scans</div>
-              <div className="text-lg font-bold text-terminal-text">1,248</div>
+              <div className="text-[9px] font-mono text-terminal-text/30 uppercase">Active Scans</div>
+              <div className="text-sm lg:text-lg font-bold text-terminal-text">1,248</div>
             </div>
-            <Separator orientation="vertical" className="h-8 bg-terminal-border" />
-            <Badge variant="outline" className="border-emerald-500/20 text-emerald-500 font-mono">
-              MODE: PASSIVE_RECON
+            <Separator orientation="vertical" className="h-8 bg-terminal-border hidden sm:block" />
+            <Badge variant="outline" className="border-emerald-500/20 text-emerald-500 font-mono text-[10px]">
+              PASSIVE_RECON
             </Badge>
           </div>
         </div>
@@ -77,29 +79,29 @@ export const OSINTRecon: React.FC<OSINTReconProps> = ({ onWeaponize }) => {
         <div className="max-w-3xl mx-auto">
           <div className="relative group">
             <div className="absolute inset-0 bg-emerald-500/5 blur-2xl rounded-full opacity-0 group-hover:opacity-100 transition-opacity" />
-            <div className="relative flex gap-2">
+            <div className="relative flex flex-col sm:flex-row gap-3 lg:gap-2">
               <div className="relative flex-1">
-                <Globe className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-emerald-500/40" />
+                <Globe className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 lg:w-5 lg:h-5 text-emerald-500/40" />
                 <Input 
                   value={target}
                   onChange={(e) => setTarget(e.target.value)}
-                  placeholder="Enter target domain, IP, or organization (e.g. example.com)"
-                  className="h-14 pl-12 bg-black/60 border-terminal-border focus:border-emerald-500/50 text-lg font-mono"
+                  placeholder="Domain or IP..."
+                  className="h-12 lg:h-14 pl-12 bg-black/60 border-terminal-border focus:border-emerald-500/50 text-base lg:text-lg font-mono"
                 />
               </div>
               <Button 
                 onClick={handleAnalyze}
                 disabled={isAnalyzing || !target}
-                className="h-14 px-8 bg-emerald-500 hover:bg-emerald-600 text-black font-bold gap-2"
+                className="h-12 lg:h-14 px-6 lg:px-8 bg-emerald-500 hover:bg-emerald-600 text-black font-bold gap-2 w-full sm:w-auto"
               >
                 {isAnalyzing ? <Activity className="w-5 h-5 animate-spin" /> : <Search className="w-5 h-5" />}
                 {isAnalyzing ? 'MAPPING...' : 'START RECON'}
               </Button>
             </div>
           </div>
-          <div className="flex justify-center gap-6 mt-4">
+          <div className="flex flex-wrap justify-center gap-3 sm:gap-6 mt-4">
             {['Subdomains', 'Endpoints', 'Tech Stack', 'Employee Profiles', 'Leaked Credentials'].map(tag => (
-              <div key={tag} className="flex items-center gap-2 text-[10px] font-mono text-terminal-text/30">
+              <div key={tag} className="flex items-center gap-2 text-[9px] lg:text-[10px] font-mono text-terminal-text/30">
                 <div className="w-1 h-1 rounded-full bg-emerald-500/40" />
                 {tag}
               </div>
@@ -108,9 +110,9 @@ export const OSINTRecon: React.FC<OSINTReconProps> = ({ onWeaponize }) => {
         </div>
       </div>
 
-      <div className="flex-1 overflow-hidden flex flex-col lg:flex-row">
+      <div className="flex-1 overflow-hidden flex flex-col">
         {/* Recon Output */}
-        <div className="flex-1 overflow-y-auto p-6 no-scrollbar border-r border-terminal-border">
+        <div className="flex-1 overflow-y-auto p-4 lg:p-6 custom-scrollbar lg:border-r border-terminal-border">
           <AnimatePresence mode="wait">
             {!reconData && !isAnalyzing ? (
               <motion.div 
@@ -157,32 +159,37 @@ export const OSINTRecon: React.FC<OSINTReconProps> = ({ onWeaponize }) => {
                 animate={{ opacity: 1, y: 0 }}
                 className="prose prose-invert prose-emerald max-w-none font-mono text-sm"
               >
-                <div className="flex items-center justify-between mb-8 pb-4 border-b border-terminal-border">
+                <div className="flex flex-col sm:flex-row sm:items-center justify-between mb-8 pb-4 border-b border-terminal-border gap-4">
                   <div className="flex items-center gap-3">
                     <Badge className="bg-emerald-500 text-black font-bold uppercase">Recon_Report</Badge>
-                    <span className="text-terminal-text/40 text-[10px] uppercase tracking-widest">Target: {target}</span>
+                    <span className="text-terminal-text/40 text-[9px] lg:text-[10px] uppercase tracking-widest truncate">Target: {target}</span>
                   </div>
-                  <div className="flex gap-2">
+                  <div className="flex flex-wrap gap-2">
                     {onWeaponize && (
                       <Button 
                         variant="outline" 
                         size="sm" 
                         onClick={() => onWeaponize(`OSINT Finding for ${target}`)}
-                        className="text-[10px] border-emerald-500/30 text-emerald-500 hover:bg-emerald-500/10 gap-2"
+                        className="text-[10px] border-emerald-500/30 text-emerald-500 hover:bg-emerald-500/10 gap-2 flex-1 sm:flex-none"
                       >
                         <Zap className="w-3 h-3" />
                         WEAPONIZE
                       </Button>
                     )}
-                    <Button variant="outline" size="sm" className="text-[10px] border-terminal-border gap-2">
+                    <Button variant="outline" size="sm" className="text-[10px] border-terminal-border gap-2 flex-1 sm:flex-none">
                       <ExternalLink className="w-3 h-3" />
                       EXPORT
                     </Button>
-                    <Button variant="outline" size="sm" onClick={() => setReconData(null)} className="text-[10px] border-terminal-border">
+                    <Button variant="outline" size="sm" onClick={() => setReconData(null)} className="text-[10px] border-terminal-border flex-1 sm:flex-none">
                       RESET
                     </Button>
                   </div>
                 </div>
+                
+                <div className="mb-8">
+                  <NeuralTargetGraph target={target} />
+                </div>
+
                 <ReactMarkdown>{reconData!}</ReactMarkdown>
               </motion.div>
             )}
@@ -190,7 +197,7 @@ export const OSINTRecon: React.FC<OSINTReconProps> = ({ onWeaponize }) => {
         </div>
 
         {/* Sidebar Intel */}
-        <div className="w-full lg:w-80 bg-black/20 p-6 space-y-8 overflow-y-auto no-scrollbar">
+        <div className="w-full lg:w-80 bg-black/20 p-6 space-y-8 overflow-y-auto custom-scrollbar">
           <div className="space-y-4">
             <h4 className="text-[10px] font-mono text-terminal-text/30 uppercase tracking-widest flex items-center gap-2">
               <MapPin className="w-3 h-3" />

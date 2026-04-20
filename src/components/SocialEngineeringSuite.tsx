@@ -17,7 +17,13 @@ import {
   Plus,
   Trash2,
   ExternalLink,
-  MousePointer2
+  MousePointer2,
+  Mic,
+  Volume2,
+  VolumeX,
+  Play,
+  Square,
+  Zap
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { Badge } from '@/components/ui/badge';
@@ -104,11 +110,16 @@ const TEMPLATES: PhishingTemplate[] = [
 ];
 
 export const SocialEngineeringSuite: React.FC = () => {
-  const [activeSubTab, setActiveSubTab] = useState<'templates' | 'links' | 'campaigns' | 'analytics'>('templates');
+  const [activeSubTab, setActiveSubTab] = useState<'templates' | 'links' | 'campaigns' | 'analytics' | 'vishing'>('templates');
   const [selectedTemplate, setSelectedTemplate] = useState<PhishingTemplate | null>(null);
   const [targetUrl, setTargetUrl] = useState('https://portal.office.com/login');
   const [maskedUrl, setMaskedUrl] = useState('');
   const [isGeneratingLink, setIsGeneratingLink] = useState(false);
+  
+  // Vishing State
+  const [vishingText, setVishingText] = useState("Hello, this is John from the IT Security department. We've detected an unusual login attempt on your account and need you to verify your credentials immediately to avoid a full account lockout. Please go to the security portal link I'm sending you now.");
+  const [isPlayingVishing, setIsPlayingVishing] = useState(false);
+  const [vishingVoice, setVishingVoice] = useState<'male' | 'female'>('male');
 
   const handleGenerateLink = () => {
     setIsGeneratingLink(true);
@@ -119,8 +130,36 @@ export const SocialEngineeringSuite: React.FC = () => {
     }, 1500);
   };
 
+  const handlePlayVishing = () => {
+    if (isPlayingVishing) {
+      window.speechSynthesis.cancel();
+      setIsPlayingVishing(false);
+      return;
+    }
+
+    const utterance = new SpeechSynthesisUtterance(vishingText);
+    
+    // Attempt to pick a decent voice
+    const voices = window.speechSynthesis.getVoices();
+    if (vishingVoice === 'male') {
+      utterance.voice = voices.find(v => v.name.includes('Google US English') || v.name.includes('Male')) || null;
+      utterance.pitch = 0.9;
+      utterance.rate = 0.95;
+    } else {
+      utterance.voice = voices.find(v => v.name.includes('Google UK English') || v.name.includes('Female')) || null;
+      utterance.pitch = 1.1;
+      utterance.rate = 1.0;
+    }
+
+    utterance.onend = () => setIsPlayingVishing(false);
+    utterance.onerror = () => setIsPlayingVishing(false);
+    
+    setIsPlayingVishing(true);
+    window.speechSynthesis.speak(utterance);
+  };
+
   return (
-    <div className="h-full flex flex-col bg-black/20 overflow-hidden">
+    <div className="h-full flex flex-col bg-black/20 overflow-hidden min-h-0">
       {/* Header */}
       <div className="p-4 lg:p-8 border-b border-terminal-border bg-obsidian-bg/80 backdrop-blur-xl">
         <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4">
@@ -134,9 +173,10 @@ export const SocialEngineeringSuite: React.FC = () => {
             </div>
           </div>
           
-          <div className="flex items-center gap-1 bg-obsidian-card p-1 rounded-lg border border-terminal-border overflow-x-auto no-scrollbar">
+          <div className="flex items-center gap-1 bg-obsidian-card p-1 rounded-lg border border-terminal-border overflow-x-auto custom-scrollbar">
             {[
               { id: 'templates', label: 'Templates', icon: Mail },
+              { id: 'vishing', label: 'Vishing AI', icon: Mic },
               { id: 'links', label: 'Link Forge', icon: LinkIcon },
               { id: 'campaigns', label: 'Campaigns', icon: Send },
               { id: 'analytics', label: 'Analytics', icon: BarChart3 },
@@ -159,7 +199,7 @@ export const SocialEngineeringSuite: React.FC = () => {
         </div>
       </div>
 
-      <div className="flex-1 overflow-y-auto p-6 lg:p-8 no-scrollbar">
+      <div className="flex-1 overflow-y-auto p-6 lg:p-8 custom-scrollbar min-h-0">
         <AnimatePresence mode="wait">
           {activeSubTab === 'templates' && (
             <motion.div
@@ -170,13 +210,20 @@ export const SocialEngineeringSuite: React.FC = () => {
               className="grid grid-cols-1 lg:grid-cols-3 gap-6"
             >
               <div className="lg:col-span-2 space-y-6">
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                   {TEMPLATES.map((template) => (
                     <Card 
                       key={template.id}
-                      onClick={() => setSelectedTemplate(template)}
+                      onClick={() => {
+                        setSelectedTemplate(template);
+                        // Optional: scroll to preview on mobile
+                        if (window.innerWidth < 1024) {
+                          const previewEl = document.getElementById('template-preview');
+                          previewEl?.scrollIntoView({ behavior: 'smooth' });
+                        }
+                      }}
                       className={cn(
-                        "p-5 bg-black/40 border-terminal-border hover:border-red-500/30 transition-all cursor-pointer group",
+                        "p-4 lg:p-5 bg-black/40 border-terminal-border hover:border-red-500/30 transition-all cursor-pointer group",
                         selectedTemplate?.id === template.id && "border-red-500/50 bg-red-500/5"
                       )}
                     >
@@ -200,9 +247,9 @@ export const SocialEngineeringSuite: React.FC = () => {
                 </div>
               </div>
 
-              <div className="space-y-6">
+              <div className="space-y-6" id="template-preview">
                 {selectedTemplate ? (
-                  <Card className="p-6 bg-obsidian-card border-terminal-border sticky top-0">
+                  <Card className="p-6 bg-obsidian-card border-terminal-border lg:sticky lg:top-0">
                     <div className="flex items-center gap-2 mb-6">
                       <Eye className="w-4 h-4 text-red-500" />
                       <h3 className="text-xs font-mono font-bold uppercase tracking-widest">Template Preview</h3>
@@ -217,7 +264,7 @@ export const SocialEngineeringSuite: React.FC = () => {
                       </div>
                       <div className="space-y-1">
                         <label className="text-[10px] font-mono text-terminal-text/30 uppercase">Body Content</label>
-                        <div className="p-4 rounded bg-black/40 border border-terminal-border text-xs text-terminal-text/70 leading-relaxed h-48 overflow-y-auto no-scrollbar">
+                        <div className="p-4 rounded bg-black/40 border border-terminal-border text-xs text-terminal-text/70 leading-relaxed h-48 overflow-y-auto custom-scrollbar">
                           {selectedTemplate.preview}
                           <br /><br />
                           [PHISHING_LINK_PLACEHOLDER]
@@ -254,21 +301,21 @@ export const SocialEngineeringSuite: React.FC = () => {
                 <p className="text-sm text-terminal-text/50">Generate obfuscated URLs and tracking pixels for your campaigns.</p>
               </div>
 
-              <Card className="p-8 bg-obsidian-card border-terminal-border space-y-6">
+              <Card className="p-4 lg:p-8 bg-obsidian-card border-terminal-border space-y-6">
                 <div className="space-y-4">
                   <div className="space-y-2">
                     <label className="text-xs font-mono font-bold text-terminal-text/50 uppercase tracking-widest">Destination URL</label>
-                    <div className="flex gap-2">
+                    <div className="flex flex-col sm:flex-row gap-3">
                       <Input 
                         value={targetUrl}
                         onChange={(e) => setTargetUrl(e.target.value)}
-                        className="bg-black/40 border-terminal-border text-terminal-text h-12"
+                        className="bg-black/40 border-terminal-border text-terminal-text h-11 lg:h-12 flex-1"
                         placeholder="https://your-harvest-site.com"
                       />
                       <Button 
                         onClick={handleGenerateLink}
                         disabled={isGeneratingLink}
-                        className="bg-red-500 hover:bg-red-600 text-white px-8 h-12 font-bold"
+                        className="bg-red-500 hover:bg-red-600 text-white px-8 h-11 lg:h-12 font-bold w-full sm:w-auto"
                       >
                         {isGeneratingLink ? "FORGING..." : "FORGE LINK"}
                       </Button>
@@ -381,6 +428,149 @@ export const SocialEngineeringSuite: React.FC = () => {
                     </div>
                   </Card>
                 ))}
+              </div>
+            </motion.div>
+          )}
+
+          {activeSubTab === 'vishing' && (
+            <motion.div
+              key="vishing"
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: -20 }}
+              className="max-w-4xl mx-auto space-y-8"
+            >
+              <div className="text-center space-y-2">
+                <h3 className="text-2xl font-bold text-terminal-text uppercase tracking-tight">Vocal Synthesis Engine</h3>
+                <p className="text-sm text-terminal-text/50 font-mono">Simulate AI-driven voice phishing (Vishing) attacks with neural synthesis.</p>
+              </div>
+
+              <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+                <Card className="lg:col-span-2 p-6 bg-obsidian-card border-terminal-border space-y-6">
+                  <div className="space-y-4">
+                    <div className="flex items-center justify-between">
+                      <label className="text-xs font-mono font-bold text-terminal-text/50 uppercase tracking-widest">Call Script</label>
+                      <Badge variant="outline" className="text-[10px] border-red-500/20 text-red-400">NEURAL_READY</Badge>
+                    </div>
+                    <textarea 
+                      value={vishingText}
+                      onChange={(e) => setVishingText(e.target.value)}
+                      className="w-full h-48 bg-black/40 border border-terminal-border rounded-xl p-4 font-mono text-sm text-terminal-text focus:outline-none focus:border-red-500/40 transition-colors resize-none custom-scrollbar"
+                    />
+                  </div>
+
+                  <div className="flex items-center gap-4">
+                    <div className="flex-1 flex items-center justify-center h-24 bg-black/60 rounded-xl border border-terminal-border relative overflow-hidden">
+                      {isPlayingVishing ? (
+                        <div className="flex items-center gap-1">
+                          {[...Array(24)].map((_, i) => (
+                            <motion.div
+                              key={i}
+                              animate={{ 
+                                height: [10, Math.random() * 40 + 10, 10],
+                                opacity: [0.3, 1, 0.3]
+                              }}
+                              transition={{ 
+                                duration: 0.5 + Math.random(), 
+                                repeat: Infinity,
+                                ease: "easeInOut"
+                              }}
+                              className="w-1 bg-red-500 rounded-full"
+                            />
+                          ))}
+                        </div>
+                      ) : (
+                        <div className="flex items-center gap-1 opacity-20">
+                          {[...Array(24)].map((_, i) => (
+                            <div key={i} className="w-1 h-3 bg-red-500 rounded-full" />
+                          ))}
+                        </div>
+                      )}
+                      <div className="absolute top-2 left-3 flex items-center gap-1.5">
+                        <Volume2 className={cn("w-3 h-3", isPlayingVishing ? "text-red-500 animate-pulse" : "text-terminal-text/20")} />
+                        <span className="text-[8px] font-mono text-terminal-text/20 uppercase tracking-tighter">Audio Spectrum</span>
+                      </div>
+                    </div>
+
+                    <Button 
+                      onClick={handlePlayVishing}
+                      className={cn(
+                        "h-24 w-24 rounded-xl flex flex-col gap-2 font-bold transition-all",
+                        isPlayingVishing 
+                          ? "bg-red-900/20 border border-red-500 text-red-500 hover:bg-red-900/30" 
+                          : "bg-red-500 hover:bg-red-600 text-white shadow-xl shadow-red-500/20"
+                      )}
+                    >
+                      {isPlayingVishing ? <Square className="w-8 h-8" /> : <Play className="w-8 h-8 border-none" />}
+                      <span className="text-xs uppercase">{isPlayingVishing ? "Stop" : "Speak"}</span>
+                    </Button>
+                  </div>
+                </Card>
+
+                <div className="space-y-6">
+                  <Card className="p-6 bg-obsidian-card border-terminal-border space-y-6">
+                    <div className="space-y-4">
+                      <div className="flex items-center gap-2">
+                        <Users className="w-4 h-4 text-red-500" />
+                        <h4 className="text-[10px] font-mono font-bold uppercase tracking-widest">Voice Profile</h4>
+                      </div>
+                      
+                      <div className="grid grid-cols-2 gap-2">
+                        <button 
+                          onClick={() => setVishingVoice('male')}
+                          className={cn(
+                            "p-3 rounded-lg border font-mono text-[10px] transition-all",
+                            vishingVoice === 'male' 
+                              ? "bg-red-500 text-white border-red-500" 
+                              : "bg-black/40 border-terminal-border text-terminal-text/40 hover:border-red-500/30"
+                          )}
+                        >
+                          MALE_V2
+                        </button>
+                        <button 
+                          onClick={() => setVishingVoice('female')}
+                          className={cn(
+                            "p-3 rounded-lg border font-mono text-[10px] transition-all",
+                            vishingVoice === 'female' 
+                              ? "bg-red-500 text-white border-red-500" 
+                              : "bg-black/40 border-terminal-border text-terminal-text/40 hover:border-red-500/30"
+                          )}
+                        >
+                          FEMALE_V1
+                        </button>
+                      </div>
+                    </div>
+
+                    <Separator className="bg-terminal-border" />
+
+                    <div className="space-y-4">
+                      <div className="flex items-center gap-2">
+                        <Zap className="w-4 h-4 text-red-500" />
+                        <h4 className="text-[10px] font-mono font-bold uppercase tracking-widest">Acoustic Mods</h4>
+                      </div>
+                      <div className="space-y-3">
+                        {['Voice Deepener', 'Background Noise (Office)', 'Call Latency Sim'].map(mod => (
+                          <div key={mod} className="flex items-center justify-between group cursor-pointer">
+                            <span className="text-[10px] font-mono text-terminal-text/40 group-hover:text-terminal-text/60">{mod}</span>
+                            <div className="w-8 h-4 rounded-full bg-black/60 border border-terminal-border relative">
+                              <div className="absolute left-1 top-1/2 -translate-y-1/2 w-2 h-2 rounded-full bg-terminal-text/20" />
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  </Card>
+
+                  <div className="p-4 rounded-xl bg-red-500/5 border border-red-500/10 space-y-2">
+                    <div className="flex items-center gap-2 text-red-500">
+                      <ShieldAlert className="w-4 h-4" />
+                      <span className="text-[10px] font-bold uppercase tracking-wider">Warning</span>
+                    </div>
+                    <p className="text-[10px] font-mono text-terminal-text/50 leading-relaxed italic">
+                      Neural synthesis can be highly convincing. Ensure all simulations follow local ethical guidelines and authorized scope.
+                    </p>
+                  </div>
+                </div>
               </div>
             </motion.div>
           )}

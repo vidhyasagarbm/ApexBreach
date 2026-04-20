@@ -25,6 +25,9 @@ import { Card } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 
+import { Progress } from "@/components/ui/progress";
+import { cn } from "@/lib/utils";
+
 const FEATURES = [
   {
     title: 'Offensive Handbook',
@@ -114,7 +117,7 @@ const FEATURES = [
 
 export const About: React.FC = () => {
   return (
-    <div className="flex flex-col h-full bg-black/40 p-6 lg:p-12 overflow-y-auto no-scrollbar">
+    <div className="flex flex-col h-full bg-black/40 p-6 lg:p-12 overflow-y-auto custom-scrollbar min-h-0">
       <div className="max-w-6xl mx-auto space-y-16">
         {/* Hero Section */}
         <div className="text-center space-y-6">
@@ -144,7 +147,7 @@ export const About: React.FC = () => {
         </div>
 
         {/* Feature Grid */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 lg:gap-6">
           {FEATURES.map((feature, i) => (
             <motion.div
               key={feature.title}
@@ -180,7 +183,7 @@ export const About: React.FC = () => {
             <div className="h-[1px] flex-1 bg-terminal-border" />
           </div>
           
-          <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-4">
             {[
               { step: '01', title: 'Reconnaissance', desc: 'Passive intelligence gathering and attack surface mapping using AI-driven OSINT.', icon: Search },
               { step: '02', title: 'Weaponization', desc: 'Crafting custom payloads and obfuscating code in the Stealth Lab to evade detection.', icon: Zap },
@@ -341,10 +344,10 @@ export const About: React.FC = () => {
           </Card>
         </div>
 
-        {/* Tactical Glossary */}
+        {/* Technical Glossary */}
         <div className="space-y-6">
           <h2 className="text-2xl font-bold text-terminal-text uppercase tracking-widest">Tactical Glossary</h2>
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-x-12 gap-y-4">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-x-12 gap-y-4">
             {[
               { term: 'TTP', def: 'Tactics, Techniques, and Procedures. The "how-to" of threat actor behavior.' },
               { term: 'OSINT', def: 'Open Source Intelligence. Data collected from publicly available sources.' },
@@ -353,7 +356,7 @@ export const About: React.FC = () => {
               { term: 'Payload', def: 'The part of the malware which performs the malicious action.' },
               { term: 'Obfuscation', def: 'The practice of making code difficult for humans and scanners to understand.' },
             ].map((g, i) => (
-              <div key={i} className="flex gap-4 border-b border-white/5 pb-4">
+              <div key={i} className="flex flex-col sm:flex-row gap-2 sm:gap-4 border-b border-white/5 pb-4">
                 <span className="text-accent font-mono font-bold text-xs shrink-0 w-24">[{g.term}]</span>
                 <p className="text-xs text-terminal-text/60 leading-relaxed">{g.def}</p>
               </div>
@@ -470,7 +473,7 @@ export const About: React.FC = () => {
         {/* Integration Ecosystem */}
         <div className="space-y-8">
           <h2 className="text-2xl font-bold text-terminal-text uppercase tracking-widest text-center">Integration Ecosystem</h2>
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+          <div className="grid grid-cols-1 xs:grid-cols-2 md:grid-cols-4 gap-4">
             {[
               { name: 'Splunk / Sentinel', type: 'SIEM Integration', icon: Activity },
               { name: 'CrowdStrike / SentinelOne', type: 'EDR Evasion', icon: Shield },
@@ -595,7 +598,3 @@ export const About: React.FC = () => {
     </div>
   );
 };
-
-function cn(...classes: any[]) {
-  return classes.filter(Boolean).join(' ');
-}

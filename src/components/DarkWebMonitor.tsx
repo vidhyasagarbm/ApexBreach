@@ -173,24 +173,24 @@ export const DarkWebMonitor: React.FC<DarkWebMonitorProps> = ({ onInvestigate, o
   return (
     <div className="h-full flex flex-col bg-black/20 overflow-hidden">
       {/* Header */}
-      <div className="p-6 lg:p-8 border-b border-terminal-border bg-obsidian-bg/80 backdrop-blur-xl">
-        <div className="flex items-center justify-between mb-6">
-          <div className="flex items-center gap-4">
-            <div className="w-12 h-12 rounded-xl bg-red-500/10 flex items-center justify-center border border-red-500/20">
-              <Ghost className="w-6 h-6 text-red-500 animate-pulse" />
+      <div className="p-4 lg:p-8 border-b border-terminal-border bg-obsidian-bg/80 backdrop-blur-xl">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between mb-6 gap-4">
+          <div className="flex items-center gap-3 lg:gap-4">
+            <div className="w-10 h-10 lg:w-12 lg:h-12 rounded-xl bg-red-500/10 flex items-center justify-center border border-red-500/20">
+              <Ghost className="w-5 h-5 lg:w-6 lg:h-6 text-red-500 animate-pulse" />
             </div>
             <div>
-              <h2 className="text-2xl font-bold text-terminal-text uppercase tracking-tight">Dark Web Leak Monitor</h2>
-              <p className="text-sm font-mono text-terminal-text/50">Monitoring underground forums and data dumps for critical exposures</p>
+              <h2 className="text-xl lg:text-2xl font-bold text-terminal-text uppercase tracking-tight">Dark Web Monitor</h2>
+              <p className="text-[10px] lg:text-sm font-mono text-terminal-text/50">Underground forums monitoring</p>
             </div>
           </div>
           
-          <div className="flex items-center gap-6">
+          <div className="flex items-center gap-4 lg:gap-6 justify-between sm:justify-end">
             {/* Global Risk Index */}
             <div className="flex flex-col items-end">
-              <span className="text-[10px] font-mono text-terminal-text/30 uppercase tracking-[0.2em] mb-1">Global Risk Index</span>
-              <div className="flex items-center gap-3">
-                <div className="w-32 h-2 bg-white/5 rounded-full overflow-hidden border border-white/5">
+              <span className="text-[8px] lg:text-[10px] font-mono text-terminal-text/30 uppercase tracking-[0.2em] mb-1">Risk Index</span>
+              <div className="flex items-center gap-2 lg:gap-3">
+                <div className="w-20 lg:w-32 h-1.5 lg:h-2 bg-white/5 rounded-full overflow-hidden border border-white/5">
                   <motion.div 
                     initial={{ width: 0 }}
                     animate={{ width: `${riskScore}%` }}
@@ -202,7 +202,7 @@ export const DarkWebMonitor: React.FC<DarkWebMonitorProps> = ({ onInvestigate, o
                   />
                 </div>
                 <span className={cn(
-                  "text-xl font-mono font-bold",
+                  "text-base lg:text-xl font-mono font-bold",
                   riskScore > 80 ? "text-red-500" : riskScore > 50 ? "text-orange-500" : "text-terminal-green"
                 )}>
                   {riskScore}
@@ -210,9 +210,9 @@ export const DarkWebMonitor: React.FC<DarkWebMonitorProps> = ({ onInvestigate, o
               </div>
             </div>
 
-            <div className="flex items-center gap-3 px-4 py-2 rounded-lg bg-red-500/5 border border-red-500/20">
-              <AlertTriangle className="w-4 h-4 text-red-500" />
-              <span className="text-xs font-mono text-red-500 font-bold uppercase tracking-widest">Threat Level: Critical</span>
+            <div className="flex items-center gap-2 lg:gap-3 px-2 lg:px-4 py-1 lg:py-2 rounded-lg bg-red-500/5 border border-red-500/20">
+              <AlertTriangle className="w-3.5 h-3.5 lg:w-4 lg:h-4 text-red-500" />
+              <span className="text-[9px] lg:text-xs font-mono text-red-500 font-bold uppercase tracking-widest hidden xs:block">Critical</span>
             </div>
           </div>
         </div>
@@ -252,7 +252,7 @@ export const DarkWebMonitor: React.FC<DarkWebMonitorProps> = ({ onInvestigate, o
       <div className="flex-1 flex overflow-hidden">
         {/* Left Panel: Stats & Visuals */}
         <div className="hidden xl:flex w-72 border-r border-terminal-border flex-col bg-black/40">
-          <div className="p-6 space-y-8 overflow-y-auto no-scrollbar">
+          <div className="p-6 space-y-8 overflow-y-auto custom-scrollbar">
             {/* Activity Chart */}
             <div>
               <div className="flex items-center gap-2 mb-4">
@@ -421,8 +421,8 @@ export const DarkWebMonitor: React.FC<DarkWebMonitorProps> = ({ onInvestigate, o
         </div>
 
         {/* Leak List */}
-        <div className="w-full lg:w-1/2 xl:w-1/3 border-r border-terminal-border flex flex-col overflow-hidden">
-          <div className="flex-1 overflow-y-auto p-6 space-y-4 no-scrollbar">
+        <div className="w-full lg:w-1/2 xl:w-1/3 border-r border-terminal-border flex flex-col overflow-hidden custom-scrollbar">
+          <div className="flex-1 overflow-y-auto p-4 lg:p-6 space-y-4 custom-scrollbar">
             <AnimatePresence initial={false}>
               {filteredLeaks.map((leak) => {
                 const isWatchlistMatch = watchlist.some(word => 
@@ -439,6 +439,13 @@ export const DarkWebMonitor: React.FC<DarkWebMonitorProps> = ({ onInvestigate, o
                     onClick={() => {
                       setSelectedLeak(leak);
                       setDecryptedContent(null);
+                      // Scroll to detail on mobile if needed
+                      if (window.innerWidth < 1024) {
+                        setTimeout(() => {
+                           const el = document.getElementById('leak-detail');
+                           el?.scrollIntoView({ behavior: 'smooth' });
+                        }, 100);
+                      }
                     }}
                     className={cn(
                       "p-4 rounded-xl border transition-all cursor-pointer group relative overflow-hidden",
@@ -501,46 +508,59 @@ export const DarkWebMonitor: React.FC<DarkWebMonitorProps> = ({ onInvestigate, o
             </AnimatePresence>
           </div>
         </div>
-
         {/* Leak Detail View */}
-        <div className="hidden lg:flex flex-1 flex-col bg-black/40 overflow-hidden">
+        <div 
+          id="leak-detail" 
+          className={cn(
+            "flex-1 flex flex-col bg-black/40 overflow-hidden",
+            !selectedLeak ? "hidden lg:flex" : "flex lg:flex"
+          )}
+        >
           {selectedLeak ? (
-            <div className="flex-1 flex flex-col p-8 overflow-hidden">
-              <div className="flex items-center justify-between mb-8">
-                <div className="flex items-center gap-4">
-                  <div className="w-10 h-10 rounded-lg bg-terminal-green/10 flex items-center justify-center border border-terminal-green/20">
-                    <ShieldAlert className="w-5 h-5 text-terminal-green" />
+            <div className="flex-1 flex flex-col p-4 lg:p-8 overflow-hidden">
+              <div className="flex items-center justify-between mb-6 lg:mb-8">
+                <div className="flex items-center gap-3 lg:gap-4">
+                  <div className="w-8 h-8 lg:w-10 lg:h-10 rounded-lg bg-terminal-green/10 flex items-center justify-center border border-terminal-green/20 shrink-0">
+                    <ShieldAlert className="w-4 h-4 lg:w-5 lg:h-5 text-terminal-green" />
                   </div>
-                  <div>
-                    <h3 className="text-xl font-bold text-terminal-text">{selectedLeak.title}</h3>
-                    <p className="text-xs font-mono text-terminal-text/50 uppercase tracking-widest">Intelligence Report: {selectedLeak.id}</p>
+                  <div className="min-w-0">
+                    <h3 className="text-base lg:text-xl font-bold text-terminal-text truncate">{selectedLeak.title}</h3>
+                    <p className="text-[10px] font-mono text-terminal-text/50 uppercase tracking-widest truncate">INTEL-ID: {selectedLeak.id}</p>
                   </div>
                 </div>
-                <Badge className={cn(
-                  "px-4 py-1 text-xs font-bold",
-                  selectedLeak.severity === 'CRITICAL' ? "bg-red-500 text-black" :
-                  selectedLeak.severity === 'HIGH' ? "bg-orange-500 text-black" :
-                  "bg-terminal-green text-black"
-                )}>
-                  {selectedLeak.severity} SEVERITY
-                </Badge>
+                <div className="flex items-center gap-2">
+                  <Badge className={cn(
+                    "px-2 lg:px-4 py-0.5 lg:py-1 text-[10px] lg:text-xs font-bold whitespace-nowrap",
+                    selectedLeak.severity === 'CRITICAL' ? "bg-red-500 text-black" :
+                    selectedLeak.severity === 'HIGH' ? "bg-orange-500 text-black" :
+                    "bg-terminal-green text-black"
+                  )}>
+                    {selectedLeak.severity}
+                  </Badge>
+                  <button 
+                    onClick={() => setSelectedLeak(null)}
+                    className="lg:hidden p-2 text-terminal-text/50 hover:text-white"
+                  >
+                    <Activity className="w-4 h-4 rotate-45" />
+                  </button>
+                </div>
               </div>
 
-              <div className="grid grid-cols-2 gap-6 mb-8">
-                <div className="p-4 rounded-xl bg-white/5 border border-white/5">
-                  <div className="text-[10px] font-mono text-terminal-text/30 uppercase mb-1">Source Origin</div>
-                  <div className="text-sm font-mono text-terminal-green">{selectedLeak.source}</div>
+              <div className="grid grid-cols-2 gap-4 lg:gap-6 mb-6 lg:mb-8">
+                <div className="p-3 lg:p-4 rounded-xl bg-white/5 border border-white/5">
+                  <div className="text-[8px] lg:text-[10px] font-mono text-terminal-text/30 uppercase mb-1">Source Origin</div>
+                  <div className="text-xs lg:text-sm font-mono text-terminal-green truncate">{selectedLeak.source}</div>
                 </div>
-                <div className="p-4 rounded-xl bg-white/5 border border-white/5">
-                  <div className="text-[10px] font-mono text-terminal-text/30 uppercase mb-1">Discovery Time</div>
-                  <div className="text-sm font-mono text-terminal-green">{selectedLeak.timestamp}</div>
+                <div className="p-3 lg:p-4 rounded-xl bg-white/5 border border-white/5">
+                  <div className="text-[8px] lg:text-[10px] font-mono text-terminal-text/30 uppercase mb-1">Discovery Time</div>
+                  <div className="text-xs lg:text-sm font-mono text-terminal-green truncate">{selectedLeak.timestamp}</div>
                 </div>
               </div>
 
               <div className="flex-1 flex flex-col overflow-hidden">
                 <div className="flex items-center justify-between mb-2">
-                  <div className="flex items-center gap-4">
-                    <div className="text-[10px] font-mono text-terminal-text/30 uppercase">Intercepted Payload</div>
+                  <div className="flex items-center gap-3 lg:gap-4">
+                    <div className="text-[10px] font-mono text-terminal-text/30 uppercase tracking-tighter">Intercepted Payload</div>
                     {selectedLeak.redacted && (
                       <button 
                         onClick={handleDecrypt}
@@ -548,7 +568,7 @@ export const DarkWebMonitor: React.FC<DarkWebMonitorProps> = ({ onInvestigate, o
                         className="flex items-center gap-1.5 text-[9px] font-mono text-terminal-green hover:text-white transition-colors disabled:opacity-50"
                       >
                         <Zap className={cn("w-3 h-3", isDecrypting && "animate-spin")} />
-                        {isDecrypting ? "BRUTE-FORCING..." : "RUN DECRYPT SIM"}
+                        <span className="hidden xs:inline">{isDecrypting ? "DECRYPTING..." : "DECRYPT SIM"}</span>
                       </button>
                     )}
                   </div>

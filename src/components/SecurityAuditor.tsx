@@ -223,7 +223,7 @@ export const SecurityAuditor: React.FC<SecurityAuditorProps> = ({ onWeaponize })
                     value={sastCode}
                     onChange={(e) => setSastCode(e.target.value)}
                     placeholder="// Paste source code here for static analysis...&#10;// Example: const API_KEY = 'sk_test_12345';"
-                    className="w-full h-full bg-black/60 border border-terminal-border rounded-xl p-4 font-mono text-sm text-terminal-text placeholder:text-terminal-text/20 focus:outline-none focus:border-cyan-500/50 transition-colors resize-none no-scrollbar"
+                    className="w-full h-full bg-black/60 border border-terminal-border rounded-xl p-4 font-mono text-sm text-terminal-text placeholder:text-terminal-text/20 focus:outline-none focus:border-cyan-500/50 transition-colors resize-none custom-scrollbar"
                   />
                   <div className="absolute bottom-4 right-4">
                     <Button 
@@ -292,7 +292,7 @@ export const SecurityAuditor: React.FC<SecurityAuditorProps> = ({ onWeaponize })
                 </div>
               </div>
             ) : (
-              <div className="flex-1 overflow-y-auto space-y-4 no-scrollbar">
+              <div className="flex-1 overflow-y-auto space-y-4 custom-scrollbar">
                 {history.length === 0 ? (
                   <div className="h-full flex flex-col items-center justify-center opacity-20 gap-4">
                     <Activity className="w-12 h-12" />
@@ -355,7 +355,7 @@ export const SecurityAuditor: React.FC<SecurityAuditorProps> = ({ onWeaponize })
             </Badge>
           </div>
           
-          <div className="flex-1 overflow-y-auto p-4 space-y-4 no-scrollbar">
+          <div className="flex-1 overflow-y-auto p-4 space-y-4 custom-scrollbar">
             {findings.length === 0 && !isScanning ? (
               <div className="h-full flex flex-col items-center justify-center text-center p-8 space-y-4 opacity-20">
                 <ShieldCheck className="w-12 h-12" />

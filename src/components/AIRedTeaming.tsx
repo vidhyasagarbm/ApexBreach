@@ -20,6 +20,7 @@ import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Progress } from '@/components/ui/progress';
 import { db, auth, collection, addDoc, serverTimestamp, handleFirestoreError, OperationType, query, where, orderBy, onSnapshot } from '@/src/firebase';
+import { jsPDF } from 'jspdf';
 
 interface AIModel {
   id: string;
@@ -156,7 +157,7 @@ export const AIRedTeaming: React.FC = () => {
               <span>Target Models</span>
             </div>
           </div>
-          <div className="flex-1 overflow-y-auto p-4 space-y-3 no-scrollbar">
+          <div className="flex-1 overflow-y-auto p-4 space-y-3 custom-scrollbar min-h-0">
             {TARGET_MODELS.map((model) => (
               <button
                 key={model.id}
@@ -190,8 +191,8 @@ export const AIRedTeaming: React.FC = () => {
 
         {/* Center: Attack Playground */}
         <div className="flex-1 flex flex-col overflow-hidden bg-black/60">
-          <div className="p-4 lg:p-6 border-b border-terminal-border bg-black/20 flex items-center justify-between">
-            <div className="flex gap-2">
+          <div className="p-4 lg:p-6 border-b border-terminal-border bg-black/20 flex flex-col sm:flex-row items-center justify-between gap-4">
+            <div className="flex gap-2 w-full sm:w-auto overflow-x-auto custom-scrollbar pb-2 sm:pb-0">
               {(['PROMPT_INJECTION', 'DATA_POISONING', 'MODEL_INVERSION', 'HISTORY'] as const).map((type) => (
                 <button
                   key={type}
@@ -213,7 +214,7 @@ export const AIRedTeaming: React.FC = () => {
             </div>
           </div>
 
-          <div className="flex-1 p-4 lg:p-8 overflow-y-auto no-scrollbar space-y-6">
+          <div className="flex-1 p-4 lg:p-8 overflow-y-auto custom-scrollbar space-y-6 min-h-0">
             {attackType === 'HISTORY' ? (
               <div className="space-y-4">
                 {history.length === 0 ? (
@@ -339,7 +340,7 @@ export const AIRedTeaming: React.FC = () => {
 
         {/* Right: Model Intelligence */}
         <div className="w-full lg:w-80 border-t lg:border-t-0 lg:border-l border-terminal-border flex flex-col bg-black/40">
-          <div className="p-6 space-y-8 overflow-y-auto no-scrollbar">
+          <div className="p-6 space-y-8 overflow-y-auto custom-scrollbar min-h-0">
             <div className="space-y-4">
               <div className="flex items-center gap-2">
                 <Search className="w-4 h-4 text-purple-500" />

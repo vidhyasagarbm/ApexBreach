@@ -62,7 +62,7 @@ export const APTEmulation: React.FC<APTEmulationProps> = ({ onWeaponize }) => {
           </Badge>
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-5 gap-4">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-3 lg:gap-4">
           {APT_ACTORS.map((actor) => (
             <button
               key={actor.id}
@@ -92,7 +92,7 @@ export const APTEmulation: React.FC<APTEmulationProps> = ({ onWeaponize }) => {
 
       <div className="flex-1 overflow-hidden flex flex-col lg:flex-row">
         {/* Playbook Content */}
-        <div className="flex-1 overflow-y-auto p-6 no-scrollbar border-r border-terminal-border">
+        <div className="flex-1 overflow-y-auto p-6 custom-scrollbar border-r border-terminal-border">
           <AnimatePresence mode="wait">
             {!playbook && !isGenerating ? (
               <motion.div 
@@ -167,7 +167,7 @@ export const APTEmulation: React.FC<APTEmulationProps> = ({ onWeaponize }) => {
         </div>
 
         {/* Sidebar Intel */}
-        <div className="w-full lg:w-80 bg-black/20 p-6 space-y-6 overflow-y-auto no-scrollbar">
+        <div className="w-full lg:w-80 bg-black/20 p-6 space-y-6 overflow-y-auto custom-scrollbar">
           <div className="space-y-4">
             <h4 className="text-[10px] font-mono text-terminal-text/30 uppercase tracking-widest flex items-center gap-2">
               <Activity className="w-3 h-3" />

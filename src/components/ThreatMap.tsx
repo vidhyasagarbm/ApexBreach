@@ -5,6 +5,8 @@ import { motion, AnimatePresence } from 'motion/react';
 import { Globe, ShieldAlert, Zap, Target, Activity } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
 
+import { cn } from '@/lib/utils';
+
 const CITIES = [
   { name: 'New York', country: 'USA', coords: [-74.006, 40.7128] },
   { name: 'London', country: 'UK', coords: [-0.1278, 51.5074] },
@@ -334,12 +336,12 @@ export const ThreatMap: React.FC = () => {
 
   return (
     <div className="flex flex-col h-full bg-obsidian-card rounded-2xl border border-obsidian-border overflow-hidden relative">
-      <div className="p-6 border-b border-obsidian-border flex items-center justify-between bg-white/5 backdrop-blur-xl">
-        <div className="flex items-center gap-3">
+      <div className="p-4 lg:p-6 border-b border-obsidian-border flex items-center justify-between bg-white/5 backdrop-blur-xl">
+        <div className="flex items-center gap-2 lg:gap-3">
           <Globe className="w-5 h-5 text-accent animate-pulse" />
-          <h2 className="text-base font-bold text-text-primary uppercase tracking-widest">Global Threat Intelligence</h2>
+          <h2 className="text-sm lg:text-base font-bold text-text-primary uppercase tracking-widest">Global Intelligence</h2>
         </div>
-        <div className="flex gap-4 text-xs font-mono">
+        <div className="flex gap-2 lg:gap-4 text-[9px] lg:text-xs font-mono">
           <div className="flex items-center gap-1.5">
             <span className="w-2 h-2 rounded-full bg-accent" />
             <span className="text-text-secondary">LOW/MED</span>
@@ -403,29 +405,29 @@ export const ThreatMap: React.FC = () => {
         </AnimatePresence>
         
         {/* Overlay Stats */}
-        <div className="absolute top-4 left-4 right-4 sm:right-auto space-y-2">
-          <div className="bg-black/60 border border-obsidian-border p-3 rounded-xl backdrop-blur-sm">
-            <div className="text-[10px] font-mono text-text-secondary/50 mb-1 uppercase tracking-widest">Total Attacks Detected</div>
-            <div className="text-xl lg:text-2xl font-mono font-bold text-accent">{stats.total.toLocaleString()}</div>
+        <div className="absolute top-4 left-4 right-4 sm:right-auto space-y-2 pointer-events-none">
+          <div className="bg-black/80 border border-obsidian-border p-2 lg:p-3 rounded-xl backdrop-blur-md">
+            <div className="text-[8px] lg:text-[10px] font-mono text-text-secondary/50 mb-1 uppercase tracking-widest">Total Attacks</div>
+            <div className="text-lg lg:text-2xl font-mono font-bold text-accent">{stats.total.toLocaleString()}</div>
           </div>
-          <div className="grid grid-cols-3 gap-2">
-            <div className="bg-black/60 border border-terminal-border p-2 rounded backdrop-blur-sm">
+          <div className="grid grid-cols-3 gap-1 lg:gap-2">
+            <div className="bg-black/80 border border-terminal-border p-1.5 lg:p-2 rounded backdrop-blur-md">
               <div className="text-[8px] lg:text-[10px] font-mono text-terminal-text/40 uppercase">DDoS</div>
-              <div className="text-xs lg:text-sm font-mono text-terminal-green">{stats.ddos}</div>
+              <div className="text-[10px] lg:text-sm font-mono text-terminal-green">{stats.ddos}</div>
             </div>
-            <div className="bg-black/60 border border-terminal-border p-2 rounded backdrop-blur-sm">
-              <div className="text-[8px] lg:text-[10px] font-mono text-terminal-text/40 uppercase">Malware</div>
-              <div className="text-xs lg:text-sm font-mono text-terminal-green">{stats.malware}</div>
+            <div className="bg-black/80 border border-terminal-border p-1.5 lg:p-2 rounded backdrop-blur-md">
+              <div className="text-[8px] lg:text-[10px] font-mono text-terminal-text/40 uppercase">Mal</div>
+              <div className="text-[10px] lg:text-sm font-mono text-terminal-green">{stats.malware}</div>
             </div>
-            <div className="bg-black/60 border border-terminal-border p-2 rounded backdrop-blur-sm">
-              <div className="text-[8px] lg:text-[10px] font-mono text-terminal-text/40 uppercase">Exploit</div>
-              <div className="text-xs lg:text-sm font-mono text-terminal-green">{stats.exploit}</div>
+            <div className="bg-black/80 border border-terminal-border p-1.5 lg:p-2 rounded backdrop-blur-md">
+              <div className="text-[8px] lg:text-[10px] font-mono text-terminal-text/40 uppercase">Exp</div>
+              <div className="text-[10px] lg:text-sm font-mono text-terminal-green">{stats.exploit}</div>
             </div>
           </div>
         </div>
 
         {/* Live Feed */}
-        <div className="absolute bottom-4 left-4 right-4 sm:top-4 sm:left-auto sm:right-4 sm:bottom-auto sm:w-64 h-48 sm:h-64 bg-black/60 border border-terminal-border rounded backdrop-blur-sm overflow-hidden flex flex-col">
+        <div className="absolute bottom-4 left-4 right-4 sm:top-4 sm:left-auto sm:right-4 sm:bottom-auto sm:w-64 h-32 sm:h-64 bg-black/80 border border-terminal-border rounded backdrop-blur-md overflow-hidden flex flex-col">
           <div className="p-2 border-b border-terminal-border bg-black/40 flex items-center gap-2">
             <Activity className="w-3 h-3 text-terminal-green" />
             <span className="text-[10px] lg:text-xs font-mono font-bold text-terminal-green uppercase">Live Attack Feed</span>
@@ -537,7 +539,3 @@ export const ThreatMap: React.FC = () => {
     </div>
   );
 };
-
-function cn(...classes: any[]) {
-  return classes.filter(Boolean).join(' ');
-}

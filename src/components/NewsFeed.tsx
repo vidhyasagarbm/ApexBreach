@@ -6,6 +6,7 @@ import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Separator } from '@/components/ui/separator';
 import { jsPDF } from 'jspdf';
+import { auth } from '@/src/firebase';
 
 const NEWS_ITEMS = [
   {
@@ -155,7 +156,8 @@ export const NewsFeed: React.FC = () => {
     
     doc.setFontSize(10);
     doc.setTextColor(150, 150, 150);
-    doc.text(`ID: ${item.id} | CONFIDENTIAL`, 20, 30);
+    const userName = auth.currentUser?.email || 'ANONYMOUS_OPERATIVE';
+    doc.text(`ID: ${item.id} | OPERATIVE: ${userName.toUpperCase()} | CONFIDENTIAL`, 20, 30);
     
     // Report Title
     doc.setFontSize(16);
@@ -193,7 +195,7 @@ export const NewsFeed: React.FC = () => {
   };
 
   return (
-    <div className="h-full overflow-y-auto no-scrollbar p-4 lg:p-8">
+    <div className="h-full overflow-y-auto custom-scrollbar p-4 lg:p-8">
       <div className="max-w-4xl mx-auto space-y-6 lg:space-y-8">
         <div className="flex flex-col sm:flex-row sm:items-center justify-between border-b border-terminal-border pb-6 gap-4">
           <div className="flex items-center gap-3 lg:gap-4">
@@ -311,7 +313,7 @@ export const NewsFeed: React.FC = () => {
               </div>
 
               {/* Modal Content */}
-              <div className="flex-1 overflow-y-auto no-scrollbar p-6 lg:p-12">
+              <div className="flex-1 overflow-y-auto custom-scrollbar p-6 lg:p-12">
                 <div className="max-w-3xl mx-auto space-y-8">
                   <div className="space-y-4">
                     <div className="flex items-center gap-3">

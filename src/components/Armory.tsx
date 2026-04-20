@@ -212,9 +212,9 @@ export const Armory: React.FC = () => {
   return (
     <div className="h-full flex flex-col bg-black/10 overflow-hidden">
       <div className="p-4 lg:p-10 border-b border-obsidian-border bg-obsidian-bg/80 backdrop-blur-xl">
-        <div className="flex flex-col sm:flex-row sm:items-center justify-between mb-6 lg:mb-10 gap-6">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between mb-6 lg:mb-10 gap-4 lg:gap-6">
           <div className="flex items-center gap-3 lg:gap-4">
-            <div className="w-10 h-10 lg:w-12 lg:h-12 rounded-2xl bg-accent/10 flex items-center justify-center border border-accent/20 shrink-0">
+            <div className="w-10 h-10 lg:w-12 lg:h-12 rounded-xl lg:rounded-2xl bg-accent/10 flex items-center justify-center border border-accent/20 shrink-0">
               <Zap className="w-5 h-5 lg:w-6 lg:h-6 text-accent" />
             </div>
             <div>
@@ -223,7 +223,7 @@ export const Armory: React.FC = () => {
             </div>
           </div>
           <div className="flex items-center gap-4 lg:gap-6">
-            <div className="flex flex-col gap-1 lg:gap-1.5 flex-1 sm:flex-none">
+            <div className="flex flex-col gap-1 lg:gap-1.5 flex-1">
               <span className="text-[8px] lg:text-[10px] font-bold text-text-secondary uppercase tracking-widest">LHOST</span>
               <input 
                 value={lhost}
@@ -236,13 +236,13 @@ export const Armory: React.FC = () => {
               <input 
                 value={lport}
                 onChange={(e) => setLport(e.target.value)}
-                className="bg-obsidian-card border border-obsidian-border rounded-lg px-3 lg:px-4 py-1.5 lg:py-2 text-[10px] lg:text-sm font-mono text-accent focus:outline-none focus:ring-2 focus:ring-accent/20 transition-all w-16 lg:w-24"
+                className="bg-obsidian-card border border-obsidian-border rounded-lg px-3 lg:px-4 py-1.5 lg:py-2 text-[10px] lg:text-sm font-mono text-accent focus:outline-none focus:ring-2 focus:ring-accent/20 transition-all w-20 lg:w-24"
               />
             </div>
           </div>
         </div>
 
-        <div className="flex gap-3 overflow-x-auto pb-2 no-scrollbar">
+        <div className="flex gap-3 overflow-x-auto pb-2 custom-scrollbar">
           {['Windows', 'Linux', 'macOS', 'Android', 'Web'].map((platform) => (
             <Button
               key={platform}
@@ -267,8 +267,8 @@ export const Armory: React.FC = () => {
         </div>
       </div>
 
-      <div className="flex-1 overflow-y-auto p-4 lg:p-10 no-scrollbar">
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 lg:gap-8">
+      <div className="flex-1 overflow-y-auto p-4 lg:p-10 custom-scrollbar">
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 lg:gap-8">
           {filteredPayloads.map((payload) => (
             <motion.div
               key={payload.id}

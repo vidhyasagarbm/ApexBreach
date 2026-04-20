@@ -62,7 +62,7 @@ export const StealthLab: React.FC<StealthLabProps> = ({ onWeaponize }) => {
           </Badge>
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-5 gap-4">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-3 lg:gap-4">
           {EVASION_TECHNIQUES.map((tech) => (
             <button
               key={tech.id}
@@ -91,8 +91,8 @@ export const StealthLab: React.FC<StealthLabProps> = ({ onWeaponize }) => {
 
       <div className="flex-1 overflow-hidden flex flex-col lg:flex-row">
         {/* Input/Output Area */}
-        <div className="flex-1 flex flex-col overflow-hidden border-r border-terminal-border">
-          <div className="flex-1 p-6 overflow-y-auto no-scrollbar space-y-6">
+        <div className="flex-1 flex flex-col overflow-hidden border-r border-terminal-border min-h-0">
+          <div className="flex-1 p-6 overflow-y-auto custom-scrollbar space-y-6 min-h-0">
             <div className="space-y-4">
               <div className="flex items-center justify-between">
                 <h4 className="text-[10px] font-mono text-terminal-text/30 uppercase tracking-widest">Raw Payload / Script</h4>
@@ -104,7 +104,7 @@ export const StealthLab: React.FC<StealthLabProps> = ({ onWeaponize }) => {
                 value={payload}
                 onChange={(e) => setPayload(e.target.value)}
                 placeholder="// Paste your payload, shellcode, or script here...&#10;// Example: powershell.exe -ExecutionPolicy Bypass -File exploit.ps1"
-                className="w-full h-48 bg-black/60 border border-terminal-border rounded-xl p-4 font-mono text-sm text-terminal-text placeholder:text-terminal-text/20 focus:outline-none focus:border-purple-500/50 transition-colors resize-none no-scrollbar"
+                className="w-full h-48 bg-black/60 border border-terminal-border rounded-xl p-4 font-mono text-sm text-terminal-text placeholder:text-terminal-text/20 focus:outline-none focus:border-purple-500/50 transition-colors resize-none custom-scrollbar"
               />
             </div>
 
@@ -155,7 +155,7 @@ export const StealthLab: React.FC<StealthLabProps> = ({ onWeaponize }) => {
         </div>
 
         {/* Sidebar Analysis */}
-        <div className="w-full lg:w-80 bg-black/20 p-6 space-y-6 overflow-y-auto no-scrollbar">
+        <div className="w-full lg:w-80 bg-black/20 p-6 space-y-6 overflow-y-auto custom-scrollbar min-h-0">
           <div className="space-y-4">
             <h4 className="text-[10px] font-mono text-terminal-text/30 uppercase tracking-widest flex items-center gap-2">
               <Search className="w-3 h-3" />

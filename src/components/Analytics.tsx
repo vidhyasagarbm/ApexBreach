@@ -7,6 +7,9 @@ import {
 import { motion } from 'motion/react';
 import { Activity, Shield, AlertTriangle, Zap, Globe, Target } from 'lucide-react';
 
+import { cn } from '@/lib/utils';
+import { Card } from '@/components/ui/card';
+
 const ATTACK_TRENDS = [
   { time: '00:00', attacks: 400, blocked: 380, severity: 20 },
   { time: '04:00', attacks: 300, blocked: 290, severity: 10 },
@@ -35,7 +38,7 @@ const REGIONAL_RISK = [
 
 export const AnalyticsDashboard: React.FC = () => {
   return (
-    <div className="h-full overflow-y-auto no-scrollbar p-4 lg:p-8 space-y-6 lg:space-y-8">
+    <div className="h-full overflow-y-auto custom-scrollbar p-4 lg:p-8 space-y-6 lg:space-y-8">
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
           <h2 className="text-xl lg:text-2xl font-bold text-terminal-green uppercase tracking-tight">Global Threat Analytics</h2>
@@ -53,7 +56,7 @@ export const AnalyticsDashboard: React.FC = () => {
       </div>
 
       {/* Stats Grid */}
-      <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 lg:gap-6">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 lg:gap-6">
         {[
           { label: 'Total Attacks', value: '1.2M', icon: AlertTriangle, color: 'text-red-500' },
           { label: 'Mitigated', value: '98.4%', icon: Shield, color: 'text-terminal-green' },
@@ -65,7 +68,7 @@ export const AnalyticsDashboard: React.FC = () => {
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: i * 0.1 }}
-            className="p-6 rounded-xl bg-black/40 border border-terminal-border hover:border-terminal-green/30 transition-all group"
+            className="p-4 lg:p-6 rounded-xl bg-black/40 border border-terminal-border hover:border-terminal-green/30 transition-all group"
           >
             <div className="flex items-center justify-between mb-4">
               <stat.icon className={cn("w-5 h-5", stat.color)} />
@@ -241,15 +244,3 @@ export const AnalyticsDashboard: React.FC = () => {
     </div>
   );
 };
-
-function cn(...inputs: any[]) {
-  return inputs.filter(Boolean).join(' ');
-}
-
-function Card({ children, className }: { children: React.ReactNode, className?: string }) {
-  return (
-    <div className={cn("rounded-xl border", className)}>
-      {children}
-    </div>
-  );
-}

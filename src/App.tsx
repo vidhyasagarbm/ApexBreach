@@ -35,7 +35,8 @@ import {
   Brain,
   ShieldCheck,
   EyeOff,
-  Workflow
+  Workflow,
+  FileDown
 } from "lucide-react";
 import { Progress } from "@/components/ui/progress";
 import { cn } from "@/lib/utils";
@@ -65,6 +66,8 @@ import { StealthLab } from "@/src/components/StealthLab";
 import { OSINTRecon } from "@/src/components/OSINTRecon";
 import { ExploitChainer } from "@/src/components/ExploitChainer";
 import { About } from "@/src/components/About";
+import { LiveOpsFeed } from "@/src/components/LiveOpsFeed";
+import { generateBriefingPDF } from "@/src/lib/reportGenerator";
 import { 
   db, 
   doc, 
@@ -137,6 +140,36 @@ export default function App() {
   const [payloadPrefill, setPayloadPrefill] = useState<PayloadPrefill | null>(null);
   const [savedScenarios, setSavedScenarios] = useState<SavedScenario[]>([]);
   const [isSavingScenario, setIsSavingScenario] = useState(false);
+  const [isGeneratingReport, setIsGeneratingReport] = useState(false);
+
+  const handleDownloadReport = async () => {
+    setIsGeneratingReport(true);
+    try {
+      // Collect findings from various pools
+      const findings = savedScenarios.map(s => ({
+        type: 'AI Tactical Analysis',
+        title: s.title,
+        content: s.analysis,
+        timestamp: s.createdAt?.toDate ? s.createdAt.toDate().toLocaleString() : new Date().toLocaleString()
+      }));
+
+      // Add a dummy finding if empty
+      if (findings.length === 0) {
+        findings.push({
+          type: 'System Notice',
+          title: 'Empty Intelligence Pool',
+          content: 'No tactical findings were saved during this session. Please use the Scenario Lab or other modules to gather intel before generating a briefing.',
+          timestamp: new Date().toLocaleString()
+        });
+      }
+
+      await generateBriefingPDF(findings);
+    } catch (error) {
+      console.error("Report generation failed:", error);
+    } finally {
+      setIsGeneratingReport(false);
+    }
+  };
 
   useEffect(() => {
     if (!auth.currentUser) return;
@@ -247,7 +280,7 @@ export default function App() {
         {isLoading && <LoadingScreen onComplete={() => setIsLoading(false)} />}
       </AnimatePresence>
       
-      <div className="flex h-screen bg-obsidian-bg text-text-primary overflow-hidden font-sans relative">
+      <div className="flex h-[100vh] bg-obsidian-bg text-text-primary overflow-hidden font-sans relative">
         {/* Scanline Effect */}
         <div className="scanline" />
         
@@ -260,183 +293,155 @@ export default function App() {
         )}>
           <button 
             onClick={() => setIsSidebarCollapsed(!isSidebarCollapsed)}
-            className="absolute -right-3 top-20 w-6 h-6 bg-obsidian-card rounded-full flex items-center justify-center hover:bg-accent/20 transition-colors z-50 border border-obsidian-border hidden lg:flex"
+            className="absolute -right-4 top-24 w-8 h-8 bg-black rounded-full flex items-center justify-center hover:bg-accent/10 transition-all z-50 border border-accent/50 shadow-[0_0_15px_rgba(0,255,65,0.3)] hidden lg:flex group"
           >
-            <ChevronRight className={cn("w-4 h-4 transition-transform", isSidebarCollapsed ? "" : "rotate-180")} />
+            <ChevronRight className={cn("w-5 h-5 text-accent transition-transform group-hover:scale-110", isSidebarCollapsed ? "" : "rotate-180")} />
           </button>
 
-          <div className={cn("p-6 border-b border-obsidian-border flex items-center justify-between lg:justify-start gap-3 overflow-hidden whitespace-nowrap", isSidebarCollapsed && "p-4 lg:justify-center")}>
-            <div className="flex items-center gap-3">
-              <div className="relative group">
-                <div className="w-10 h-10 rounded-xl bg-accent/10 flex items-center justify-center border border-accent/20 shrink-0 relative z-10">
-                  <Shield className="w-6 h-6 text-accent" />
+          <div className="flex-1 flex flex-col overflow-hidden h-full w-full">
+            <div className={cn("p-6 border-b border-obsidian-border flex items-center justify-between lg:justify-start gap-3 overflow-hidden whitespace-nowrap", isSidebarCollapsed && "p-4 lg:justify-center")}>
+              <div className="flex items-center gap-3">
+                <div className="relative group">
+                  <div className="w-10 h-10 rounded-xl bg-accent/10 flex items-center justify-center border border-accent/20 shrink-0 relative z-10">
+                    <Shield className="w-6 h-6 text-accent" />
+                  </div>
+                  <div className="absolute inset-0 bg-accent/20 blur-xl rounded-full opacity-50" />
                 </div>
-                <div className="absolute inset-0 bg-accent/20 blur-xl rounded-full opacity-50" />
-              </div>
-              {(!isSidebarCollapsed || (isSidebarCollapsed && window.innerWidth < 1024)) && (
-                <div>
+                <div className="lg:block">
                   <h1 className="text-xl font-bold font-display text-text-primary tracking-tight flex items-center gap-2">
                     Apex<span className="text-accent">Breach</span>
                     <span className="text-[9px] bg-accent/10 text-accent px-1.5 py-0.5 rounded-full border border-accent/20 font-mono font-medium">PRO</span>
                   </h1>
                   <p className="text-[10px] font-mono text-text-secondary uppercase tracking-[0.2em]">Offensive Intelligence</p>
                 </div>
-              )}
+              </div>
+
+              <Button 
+                variant="ghost" 
+                size="icon" 
+                className="lg:hidden h-10 w-10 text-accent hover:bg-accent/10 transition-colors"
+                onClick={() => setIsSidebarCollapsed(true)}
+              >
+                <X className="w-6 h-6" />
+              </Button>
             </div>
 
-            {/* Firebase Status Indicator */}
-            {!isSidebarCollapsed && (
-              <div className="px-4 py-1 rounded-lg bg-white/5 border border-white/10 flex items-center gap-2">
-                <div className={cn(
-                  "w-1.5 h-1.5 rounded-full animate-pulse",
-                  firebaseStatus === "connected" ? "bg-emerald-500 shadow-[0_0_8px_rgba(16,185,129,0.5)]" :
-                  firebaseStatus === "error" ? "bg-red-500 shadow-[0_0_8px_rgba(239,68,68,0.5)]" :
-                  "bg-yellow-500 shadow-[0_0_8px_rgba(245,158,11,0.5)]"
-                )} />
-                <span className={cn(
-                  "text-[9px] font-mono uppercase",
-                  firebaseStatus === "connected" ? "text-emerald-500" :
-                  firebaseStatus === "error" ? "text-red-500" :
-                  "text-yellow-500"
-                )}>
-                  {firebaseStatus}
-                </span>
-              </div>
-            )}
-
-            <Button 
-              variant="ghost" 
-              size="icon" 
-              className="lg:hidden"
-              onClick={() => setIsSidebarCollapsed(true)}
-            >
-              <X className="w-5 h-5" />
-            </Button>
-          </div>
-
-          {(!isSidebarCollapsed || (isSidebarCollapsed && window.innerWidth < 1024)) && (
-            <>
-              <div className="p-4">
-                <div className="relative">
-                  <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-text-secondary" />
-                  <Input 
-                    placeholder="Search intelligence..." 
-                    className="pl-9 bg-obsidian-card border-obsidian-border focus:border-accent/50 text-sm"
-                    value={searchQuery}
-                    onChange={(e) => setSearchQuery(e.target.value)}
-                  />
+            {(!isSidebarCollapsed || (isSidebarCollapsed && window.innerWidth < 1024)) && (
+              <>
+                <div className="p-4 shrink-0">
+                  <div className="relative">
+                    <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-text-secondary" />
+                    <Input 
+                      placeholder="Search intelligence..." 
+                      className="pl-9 bg-obsidian-card border-obsidian-border focus:border-accent/50 text-sm"
+                      value={searchQuery}
+                      onChange={(e) => setSearchQuery(e.target.value)}
+                    />
+                  </div>
                 </div>
-              </div>
 
-              <div className="flex-1 overflow-y-auto px-2 no-scrollbar">
-                <div className="space-y-1 py-4">
-                  <div className="space-y-1">
-                    {filteredTTPs.map((ttp) => (
-                    <div key={ttp.id} className="mb-2">
-                      <button
-                        onClick={() => {
-                          setSelectedTTP(ttp);
-                          setSelectedTechnique(ttp.techniques[0]);
-                          setAiExplanation(null);
-                          setActiveTab("handbook");
-                        }}
-                        className={cn(
-                          "w-full flex items-center justify-between px-3 py-2 rounded-lg transition-all text-left group",
-                          selectedTTP.id === ttp.id 
-                            ? "bg-accent text-black shadow-lg shadow-accent/20" 
-                            : "hover:bg-white/5 text-text-secondary"
-                        )}
-                      >
-                        <div className="flex items-center gap-3">
-                          <div className={cn(
-                            "w-1.5 h-1.5 rounded-full",
-                            selectedTTP.id === ttp.id ? "bg-black" : "bg-white/10"
+                <div className="flex-1 overflow-y-auto px-2 custom-scrollbar min-h-0">
+                  <div className="space-y-1 py-4">
+                    <div className="space-y-1">
+                      {filteredTTPs.map((ttp) => (
+                      <div key={ttp.id} className="mb-2">
+                        <button
+                          onClick={() => {
+                            setSelectedTTP(ttp);
+                            setSelectedTechnique(ttp.techniques[0]);
+                            setAiExplanation(null);
+                            setActiveTab("handbook");
+                          }}
+                          className={cn(
+                            "w-full flex items-center justify-between px-3 py-2 rounded-lg transition-all text-left group",
+                            selectedTTP.id === ttp.id 
+                              ? "bg-accent text-black shadow-lg shadow-accent/20" 
+                              : "hover:bg-white/5 text-text-secondary"
+                          )}
+                        >
+                          <div className="flex items-center gap-3">
+                            <div className={cn(
+                              "w-1.5 h-1.5 rounded-full",
+                              selectedTTP.id === ttp.id ? "bg-black" : "bg-white/10"
+                            )} />
+                            <span className="text-sm font-medium tracking-tight">{ttp.name}</span>
+                          </div>
+                          <ChevronRight className={cn(
+                            "w-4 h-4 transition-transform",
+                            selectedTTP.id === ttp.id ? "rotate-90" : "opacity-0 group-hover:opacity-100"
                           )} />
-                          <span className="text-sm font-medium tracking-tight">{ttp.name}</span>
-                        </div>
-                        <ChevronRight className={cn(
-                          "w-4 h-4 transition-transform",
-                          selectedTTP.id === ttp.id ? "rotate-90" : "opacity-0 group-hover:opacity-100"
-                        )} />
-                      </button>
+                        </button>
 
-                      <AnimatePresence>
-                        {selectedTTP.id === ttp.id && (
-                          <motion.div
-                            initial={{ height: 0, opacity: 0 }}
-                            animate={{ height: "auto", opacity: 1 }}
-                            exit={{ height: 0, opacity: 0 }}
-                            className="overflow-hidden ml-4 mt-1 space-y-1 border-l border-obsidian-border"
-                          >
-                            {ttp.techniques.map((tech) => (
-                              <button
-                                key={tech.id}
-                                onClick={() => {
-                                  setSelectedTechnique(tech);
-                                  setAiExplanation(null);
-                                  setActiveTab("handbook");
-                                }}
-                                className={cn(
-                                  "w-full text-left px-4 py-1.5 text-xs font-medium transition-all flex items-center justify-between group",
-                                  selectedTechnique.id === tech.id 
-                                    ? "text-text-primary" 
-                                    : "text-text-secondary hover:text-text-primary hover:bg-white/5"
-                                )}
-                              >
-                                <span>{tech.name}</span>
-                              </button>
-                            ))}
-                          </motion.div>
-                        )}
-                      </AnimatePresence>
-                    </div>
-                  ))}
+                        <AnimatePresence>
+                          {selectedTTP.id === ttp.id && (
+                            <motion.div
+                              initial={{ height: 0, opacity: 0 }}
+                              animate={{ height: "auto", opacity: 1 }}
+                              exit={{ height: 0, opacity: 0 }}
+                              className="overflow-hidden ml-4 mt-1 space-y-1 border-l border-obsidian-border"
+                            >
+                              {ttp.techniques.map((tech) => (
+                                <button
+                                  key={tech.id}
+                                  onClick={() => {
+                                    setSelectedTechnique(tech);
+                                    setAiExplanation(null);
+                                    setActiveTab("handbook");
+                                  }}
+                                  className={cn(
+                                    "w-full text-left px-4 py-1.5 text-xs font-medium transition-all flex items-center justify-between group",
+                                    selectedTechnique.id === tech.id 
+                                      ? "text-text-primary" 
+                                      : "text-text-secondary hover:text-text-primary hover:bg-white/5"
+                                  )}
+                                >
+                                  <span>{tech.name}</span>
+                                </button>
+                              ))}
+                            </motion.div>
+                          )}
+                        </AnimatePresence>
+                      </div>
+                    ))}
+                  </div>
                 </div>
               </div>
-            </div>
-          </>
-        )}
-      </aside>
+            </>
+          )}
+          </div>
+        </aside>
 
         {/* Main Content */}
-        <main className="flex-1 flex flex-col min-w-0 bg-black/10">
+        <main className="flex-1 flex flex-col min-w-0 bg-black/10 min-h-0 overflow-hidden">
           {/* Header */}
-          <header className="h-auto border-b border-obsidian-border flex flex-col xl:flex-row items-center justify-between px-3 lg:px-6 py-3 xl:py-0 bg-obsidian-bg/80 backdrop-blur-xl z-30 gap-4 xl:h-14">
-            <div className="flex items-center justify-between w-full xl:w-auto gap-2 lg:gap-4">
-              <div className="flex items-center gap-2">
+          <header className="shrink-0 h-auto border-b border-obsidian-border flex flex-col xl:flex-row items-center px-4 lg:px-6 py-3 xl:py-0 bg-obsidian-bg/80 backdrop-blur-xl z-30 gap-3 xl:h-14">
+            <div className="flex items-center justify-between w-full xl:w-auto gap-4">
+              <div className="flex items-center gap-3">
                 <Button 
                   variant="ghost" 
                   size="icon" 
-                  className="lg:hidden h-8 w-8"
+                  className="lg:hidden h-10 w-10 bg-accent/10 border border-accent/30 shadow-[0_0_10px_rgba(0,255,65,0.2)]"
                   onClick={() => setIsSidebarCollapsed(false)}
                 >
-                  <Shield className="w-5 h-5 text-accent" />
+                  <Shield className="w-6 h-6 text-accent" />
                 </Button>
                 
-                <div className="flex items-center gap-3 lg:gap-6">
-                  <div className="flex items-center gap-1.5 lg:gap-2">
-                    <Layers className="w-3.5 h-3.5 lg:w-4 lg:h-4 text-accent" />
-                    <span className="text-[9px] lg:text-xs font-medium text-text-secondary uppercase tracking-widest hidden xs:inline">TTP:</span>
-                    <Badge variant="outline" className="bg-accent/10 border-accent/20 text-accent font-medium text-[8px] lg:text-[10px] px-1.5 lg:px-2 py-0">
-                      {selectedTTP.level}
-                    </Badge>
-                  </div>
-                  <Separator orientation="vertical" className="h-3 lg:h-4 bg-obsidian-border hidden sm:block" />
-                  <div className="flex items-center gap-1.5 lg:gap-2">
-                    <Target className="w-3.5 h-3.5 lg:w-4 lg:h-4 text-accent" />
-                    <span className="text-[9px] lg:text-xs font-medium text-text-secondary uppercase tracking-widest hidden xs:inline">Tool:</span>
-                    <Badge variant="outline" className="bg-accent/10 border-accent/20 text-accent font-medium text-[8px] lg:text-[10px] px-1.5 lg:px-2 py-0">
-                      {selectedTechnique.kaliTool}
-                    </Badge>
-                  </div>
-                </div>
+                <h1 className="lg:hidden text-lg font-bold font-display text-text-primary tracking-tight">
+                  Apex<span className="text-accent">Breach</span>
+                </h1>
               </div>
 
-              <div className="flex items-center gap-2 lg:hidden">
+              <div className="flex items-center gap-2">
+                <div className={cn(
+                    "w-2 h-2 rounded-full animate-pulse lg:hidden",
+                    firebaseStatus === "connected" ? "bg-emerald-500 shadow-[0_0_8px_rgba(16,185,129,0.5)]" :
+                    firebaseStatus === "error" ? "bg-red-500 shadow-[0_0_8px_rgba(239,68,68,0.5)]" :
+                    "bg-yellow-500 shadow-[0_0_8px_rgba(245,158,11,0.5)]"
+                  )} />
                 <Button
                   variant="ghost"
                   size="icon"
-                  className="h-8 w-8 text-terminal-green"
+                  className="h-9 w-9 text-accent lg:hidden"
                   onClick={() => setIsScenarioLabCollapsed(!isScenarioLabCollapsed)}
                 >
                   <Zap className="w-5 h-5" />
@@ -444,8 +449,8 @@ export default function App() {
               </div>
             </div>
             
-            <div className="w-full xl:w-auto">
-              <div className="flex flex-wrap items-center justify-center xl:justify-start gap-1 bg-obsidian-card p-1 rounded-xl border border-obsidian-border">
+            <div className="w-full xl:w-auto px-4 xl:px-0">
+              <div className="flex flex-wrap items-center justify-center xl:justify-start gap-1 bg-obsidian-card/50 p-1 rounded-xl border border-obsidian-border w-full">
                 {[
                   { id: "handbook", label: "HANDBOOK", icon: Shield },
                   { id: "social", label: "SOCIAL ENGIN.", icon: Users },
@@ -479,11 +484,28 @@ export default function App() {
                 ))}
               </div>
             </div>
+
+            <div className="hidden xl:flex items-center gap-3 ml-auto">
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={handleDownloadReport}
+                disabled={isGeneratingReport}
+                className="bg-accent/5 border-accent/20 text-accent hover:bg-accent/10 font-mono text-[10px] h-9 gap-2"
+              >
+                {isGeneratingReport ? (
+                  <Activity className="w-3.5 h-3.5 animate-spin" />
+                ) : (
+                  <FileDown className="w-3.5 h-3.5" />
+                )}
+                <span>DOWNLOAD BRIEFING</span>
+              </Button>
+            </div>
           </header>
 
           {/* Content Area */}
-          <div className="flex-1 flex overflow-hidden relative">
-            <div className="flex-1 flex overflow-hidden">
+          <div className="flex-1 flex overflow-hidden relative min-h-0">
+            <div className="flex-1 flex overflow-hidden min-h-0">
               <AnimatePresence mode="wait">
                 {activeTab === "handbook" ? (
                     <motion.div 
@@ -491,11 +513,11 @@ export default function App() {
                       initial={{ opacity: 0, x: -20 }}
                       animate={{ opacity: 1, x: 0 }}
                       exit={{ opacity: 0, x: 20 }}
-                      className="flex-1 flex flex-col overflow-hidden w-full"
+                      className="flex-1 flex flex-col overflow-hidden w-full min-h-0"
                     >
                       {/* Left: Technique Details */}
-                      <div className="flex-1 flex flex-col min-w-0">
-                        <div className="flex-1 overflow-y-auto no-scrollbar">
+                      <div className="flex-1 flex flex-col min-w-0 min-h-0">
+                        <div className="flex-1 overflow-y-auto custom-scrollbar min-h-0">
                         <div className="p-4 lg:p-6 max-w-4xl mx-auto">
                           <motion.div
                             key={selectedTechnique.id}
@@ -631,7 +653,7 @@ export default function App() {
                   initial={{ opacity: 0, y: 20 }}
                   animate={{ opacity: 1, y: 0 }}
                   exit={{ opacity: 0, y: -20 }}
-                  className="flex-1 overflow-hidden"
+                  className="flex-1 flex flex-col overflow-hidden min-h-0"
                 >
                   <AnalyticsDashboard />
                 </motion.div>
@@ -641,7 +663,7 @@ export default function App() {
                   initial={{ opacity: 0, y: 20 }}
                   animate={{ opacity: 1, y: 0 }}
                   exit={{ opacity: 0, y: -20 }}
-                  className="flex-1 overflow-hidden"
+                  className="flex-1 flex flex-col overflow-y-auto custom-scrollbar"
                 >
                   <NewsFeed />
                 </motion.div>
@@ -651,7 +673,7 @@ export default function App() {
                   initial={{ opacity: 0, y: 20 }}
                   animate={{ opacity: 1, y: 0 }}
                   exit={{ opacity: 0, y: -20 }}
-                  className="flex-1 overflow-hidden"
+                  className="flex-1 flex flex-col overflow-hidden min-h-0"
                 >
                   <DarkWebMonitor onInvestigate={handleInvestigateLeak} />
                 </motion.div>
@@ -661,7 +683,7 @@ export default function App() {
                   initial={{ opacity: 0, y: 20 }}
                   animate={{ opacity: 1, y: 0 }}
                   exit={{ opacity: 0, y: -20 }}
-                  className="flex-1 overflow-hidden"
+                  className="flex-1 flex flex-col overflow-hidden min-h-0"
                 >
                   <SocialEngineeringSuite />
                 </motion.div>
@@ -671,11 +693,13 @@ export default function App() {
                     initial={{ opacity: 0, y: 20 }}
                     animate={{ opacity: 1, y: 0 }}
                     exit={{ opacity: 0, y: -20 }}
-                    className="flex-1 overflow-y-auto no-scrollbar"
+                    className="flex-1 overflow-hidden"
                   >
-                    <div className="p-4 lg:p-6 space-y-4 lg:space-y-6 max-w-6xl mx-auto">
-                      <PayloadGenerator prefill={payloadPrefill} />
-                      <Armory />
+                    <div className="h-full flex flex-col">
+                      <div className="p-4 lg:p-6 space-y-4 lg:space-y-6 max-w-6xl mx-auto w-full flex-1 overflow-y-auto custom-scrollbar">
+                        <PayloadGenerator prefill={payloadPrefill} />
+                        <Armory />
+                      </div>
                     </div>
                   </motion.div>
               ) : activeTab === "aired" ? (
@@ -684,7 +708,7 @@ export default function App() {
                   initial={{ opacity: 0, y: 20 }}
                   animate={{ opacity: 1, y: 0 }}
                   exit={{ opacity: 0, y: -20 }}
-                  className="flex-1 overflow-hidden"
+                  className="flex-1 flex flex-col overflow-y-auto custom-scrollbar"
                 >
                   <AIRedTeaming />
                 </motion.div>
@@ -694,7 +718,7 @@ export default function App() {
                   initial={{ opacity: 0, y: 20 }}
                   animate={{ opacity: 1, y: 0 }}
                   exit={{ opacity: 0, y: -20 }}
-                  className="flex-1 overflow-hidden"
+                  className="flex-1 flex flex-col overflow-hidden min-h-0"
                 >
                   <SecurityAuditor onWeaponize={handleWeaponizeFinding} />
                 </motion.div>
@@ -704,7 +728,7 @@ export default function App() {
                   initial={{ opacity: 0, y: 20 }}
                   animate={{ opacity: 1, y: 0 }}
                   exit={{ opacity: 0, y: -20 }}
-                  className="flex-1 overflow-hidden"
+                  className="flex-1 flex flex-col overflow-hidden min-h-0"
                 >
                   <APTEmulation onWeaponize={handleWeaponizeFinding} />
                 </motion.div>
@@ -714,7 +738,7 @@ export default function App() {
                   initial={{ opacity: 0, y: 20 }}
                   animate={{ opacity: 1, y: 0 }}
                   exit={{ opacity: 0, y: -20 }}
-                  className="flex-1 overflow-hidden"
+                  className="flex-1 flex flex-col overflow-hidden min-h-0"
                 >
                   <StealthLab onWeaponize={handleWeaponizeFinding} />
                 </motion.div>
@@ -724,7 +748,7 @@ export default function App() {
                   initial={{ opacity: 0, y: 20 }}
                   animate={{ opacity: 1, y: 0 }}
                   exit={{ opacity: 0, y: -20 }}
-                  className="flex-1 overflow-hidden"
+                  className="flex-1 flex flex-col overflow-hidden min-h-0"
                 >
                   <OSINTRecon onWeaponize={handleWeaponizeFinding} />
                 </motion.div>
@@ -734,7 +758,7 @@ export default function App() {
                   initial={{ opacity: 0, y: 20 }}
                   animate={{ opacity: 1, y: 0 }}
                   exit={{ opacity: 0, y: -20 }}
-                  className="flex-1 overflow-hidden"
+                  className="flex-1 flex flex-col overflow-hidden min-h-0"
                 >
                   <ExploitChainer onWeaponize={handleWeaponizeFinding} />
                 </motion.div>
@@ -744,7 +768,7 @@ export default function App() {
                   initial={{ opacity: 0, y: 20 }}
                   animate={{ opacity: 1, y: 0 }}
                   exit={{ opacity: 0, y: -20 }}
-                  className="flex-1 overflow-hidden"
+                  className="flex-1 flex flex-col overflow-y-auto custom-scrollbar"
                 >
                   <About />
                 </motion.div>
@@ -754,7 +778,7 @@ export default function App() {
                   initial={{ opacity: 0, y: 20 }}
                   animate={{ opacity: 1, y: 0 }}
                   exit={{ opacity: 0, y: -20 }}
-                  className="flex-1 overflow-hidden"
+                  className="flex-1 flex flex-col overflow-hidden"
                 >
                   <CVEIntelligence onWeaponize={handleWeaponizeCVE} />
                 </motion.div>
@@ -764,19 +788,20 @@ export default function App() {
 
           {/* Right: AI Scenario Lab */}
           <div className={cn(
-            "flex flex-col bg-black/30 border-l border-terminal-border transition-all duration-300 relative overflow-hidden z-30",
+            "flex flex-col bg-black/30 border-l border-terminal-border transition-all duration-300 relative z-30",
             isScenarioLabCollapsed ? "h-0 xl:h-auto xl:w-12" : "h-[400px] xl:h-auto xl:w-[400px]",
             "fixed xl:relative bottom-0 left-0 right-0 xl:inset-y-0 xl:left-auto xl:right-auto bg-obsidian-bg xl:bg-black/30",
             isScenarioLabCollapsed && "xl:flex hidden"
           )}>
             <button 
               onClick={() => setIsScenarioLabCollapsed(!isScenarioLabCollapsed)}
-              className="absolute -left-3 top-10 xl:top-20 w-6 h-6 bg-terminal-border rounded-full items-center justify-center hover:bg-terminal-green/20 transition-colors z-50 border border-terminal-border hidden xl:flex"
+              className="absolute -left-4 top-24 w-8 h-8 bg-black rounded-full flex items-center justify-center hover:bg-accent/10 transition-all z-50 border border-accent/50 shadow-[0_0_15px_rgba(0,255,65,0.3)] hidden xl:flex group"
             >
-              <ChevronRight className={cn("w-4 h-4 transition-transform", isScenarioLabCollapsed ? "rotate-180" : "rotate-0")} />
+              <ChevronRight className={cn("w-5 h-5 text-accent transition-transform group-hover:scale-110", isScenarioLabCollapsed ? "rotate-180" : "rotate-0")} />
             </button>
-
-            <div className="xl:hidden flex items-center justify-between p-3 border-b border-terminal-border bg-black/40">
+            
+            <div className="flex-1 flex flex-col overflow-hidden h-full w-full">
+              <div className="xl:hidden flex items-center justify-between p-3 border-b border-terminal-border bg-black/40">
               <div className="flex items-center gap-2">
                 <Zap className="w-4 h-4 text-terminal-green" />
                 <h3 className="text-xs font-mono font-bold uppercase tracking-widest">HACKING SCENARIO LAB</h3>
@@ -798,8 +823,8 @@ export default function App() {
                   </p>
                 </div>
 
-                <div className="flex-1 flex flex-col overflow-hidden">
-                  <div className="flex-1 overflow-y-auto p-4 lg:p-6 no-scrollbar">
+                <div className="flex-1 flex flex-col overflow-hidden min-h-0">
+                  <div className="flex-1 overflow-y-auto p-4 lg:p-6 custom-scrollbar min-h-0">
                     {scenarioAnalysis ? (
                       <motion.div
                         initial={{ opacity: 0 }}
@@ -933,8 +958,15 @@ export default function App() {
                 <Zap className="w-4 h-4 text-terminal-green/40" />
               </div>
             )}
+            
+            {!isScenarioLabCollapsed && (
+              <div className="h-[250px] shrink-0 border-t border-terminal-border">
+                <LiveOpsFeed />
+              </div>
+            )}
           </div>
         </div>
+      </div>
         </main>
       </div>
     </TooltipProvider>
