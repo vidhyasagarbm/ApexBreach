@@ -1,5 +1,6 @@
 import React, { useEffect, useRef } from 'react';
 import * as d3 from 'd3';
+import { ZoomIn, ZoomOut, Maximize2 } from 'lucide-react';
 
 interface Node extends d3.SimulationNodeDatum {
   id: string;
@@ -65,12 +66,27 @@ export const NeuralTargetGraph: React.FC<NeuralTargetGraphProps> = ({ target }) 
       .attr("height", height)
       .attr("viewBox", [0, 0, width, height]);
 
+    // Create a container group for zooming
+    const g = svg.append("g");
+
+    // Add zoom behavior
+    const zoomBehavior = d3.zoom<SVGSVGElement, unknown>()
+      .scaleExtent([0.5, 5])
+      .on("zoom", (event) => {
+        g.attr("transform", event.transform);
+      });
+
+    svg.call(zoomBehavior);
+
+    // Attach zoom behavior for button access
+    (svgRef.current as any).zoom = zoomBehavior;
+
     const simulation = d3.forceSimulation<Node>(nodes)
       .force("link", d3.forceLink<Node, Link>(links).id(d => d.id).distance(100))
       .force("charge", d3.forceManyBody().strength(-300))
       .force("center", d3.forceCenter(width / 2, height / 2));
 
-    const link = svg.append("g")
+    const link = g.append("g")
       .attr("stroke", "#10b981")
       .attr("stroke-opacity", 0.2)
       .selectAll("line")
@@ -78,7 +94,7 @@ export const NeuralTargetGraph: React.FC<NeuralTargetGraphProps> = ({ target }) 
       .join("line")
       .attr("stroke-width", d => Math.sqrt(d.value));
 
-    const node = svg.append("g")
+    const node = g.append("g")
       .attr("stroke", "#000")
       .attr("stroke-width", 1.5)
       .selectAll<SVGGElement, Node>("g")
@@ -96,13 +112,15 @@ export const NeuralTargetGraph: React.FC<NeuralTargetGraphProps> = ({ target }) 
       .attr("class", "node-glow");
 
     node.append("text")
-      .attr("dx", 12)
+      .attr("dx", 15)
       .attr("dy", ".35em")
       .text(d => d.label)
       .attr("fill", "#10b981")
-      .attr("font-size", "10px")
+      .attr("stroke", "none")
+      .attr("font-size", "11px")
+      .attr("font-weight", "bold")
       .attr("font-family", "monospace")
-      .attr("style", "pointer-events: none; text-shadow: 0 0 5px rgba(16, 185, 129, 0.5);");
+      .attr("style", "pointer-events: none; text-shadow: 0 0 10px rgba(16, 185, 129, 0.8), 0 0 2px #000;");
 
     simulation.on("tick", () => {
       link
@@ -143,6 +161,47 @@ export const NeuralTargetGraph: React.FC<NeuralTargetGraphProps> = ({ target }) 
         <div className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
         <span className="text-[10px] font-mono text-emerald-500 uppercase tracking-widest">Neural Target Map v1.0</span>
       </div>
+
+      {/* Zoom Controls */}
+      <div className="absolute top-4 right-4 z-10 flex flex-col gap-2">
+        <button 
+          onClick={() => {
+            if (!svgRef.current) return;
+            const svg = d3.select(svgRef.current);
+            const behavior = (svgRef.current as any).zoom;
+            if (behavior) svg.transition().duration(300).call(behavior.scaleBy, 1.3);
+          }}
+          className="p-2 bg-black/60 border border-terminal-border rounded-lg text-emerald-500 hover:bg-emerald-500/10 transition-colors"
+          title="Zoom In"
+        >
+          <ZoomIn className="w-4 h-4" />
+        </button>
+        <button 
+          onClick={() => {
+            if (!svgRef.current) return;
+            const svg = d3.select(svgRef.current);
+            const behavior = (svgRef.current as any).zoom;
+            if (behavior) svg.transition().duration(300).call(behavior.scaleBy, 0.7);
+          }}
+          className="p-2 bg-black/60 border border-terminal-border rounded-lg text-emerald-500 hover:bg-emerald-500/10 transition-colors"
+          title="Zoom Out"
+        >
+          <ZoomOut className="w-4 h-4" />
+        </button>
+        <button 
+          onClick={() => {
+            if (!svgRef.current) return;
+            const svg = d3.select(svgRef.current);
+            const behavior = (svgRef.current as any).zoom;
+            if (behavior) svg.transition().duration(300).call(behavior.transform, d3.zoomIdentity);
+          }}
+          className="p-2 bg-black/60 border border-terminal-border rounded-lg text-emerald-500 hover:bg-emerald-500/10 transition-colors"
+          title="Reset View"
+        >
+          <Maximize2 className="w-4 h-4" />
+        </button>
+      </div>
+
       <svg ref={svgRef} className="w-full h-full cursor-move" />
       <div className="absolute bottom-4 right-4 pointer-events-none">
         <div className="text-[8px] font-mono text-terminal-text/20 uppercase text-right">

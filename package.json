@@ -1,11 +1,14 @@
 {
-  "name": "react-example",
+  "name": "ApexBreach",
   "private": true,
-  "version": "0.0.0",
+  "version": "0.1.0",
+  "description": "The peak of offensive security intelligence and adversarial testing.",
   "type": "module",
   "scripts": {
-    "dev": "vite --port=3000 --host=0.0.0.0",
+    "dev": "tsx server.ts",
     "build": "vite build",
+    "postbuild": "echo 'Artifacts generated in dist/'",
+    "start": "node server.ts",
     "preview": "vite preview",
     "clean": "rm -rf dist",
     "lint": "tsc --noEmit"
@@ -32,6 +35,7 @@
     "react-dom": "^19.0.0",
     "react-markdown": "^10.1.0",
     "recharts": "^3.8.1",
+    "rss-parser": "^3.13.0",
     "shadcn": "^4.1.2",
     "tailwind-merge": "^3.5.0",
     "topojson-client": "^3.1.0",

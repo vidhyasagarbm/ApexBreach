@@ -90,13 +90,13 @@ export const SecurityAuditor: React.FC<SecurityAuditorProps> = ({ onWeaponize })
           handleFirestoreError(err, OperationType.WRITE, 'security_audits');
         }
       }
-    } catch (error) {
+    } catch (error: any) {
       console.error("SAST Error:", error);
       setFindings([{
         id: 'err',
         type: 'CRITICAL',
         title: 'Analysis Failed',
-        description: 'The security audit engine encountered an error while analyzing the code.',
+        description: error.message || 'The security audit engine encountered an error while analyzing the code.',
         remediation: 'Check your API configuration or try a smaller code snippet.'
       }]);
     } finally {
@@ -134,13 +134,13 @@ export const SecurityAuditor: React.FC<SecurityAuditorProps> = ({ onWeaponize })
           handleFirestoreError(err, OperationType.WRITE, 'security_audits');
         }
       }
-    } catch (error) {
+    } catch (error: any) {
       console.error("DAST Error:", error);
       setFindings([{
         id: 'err-d',
         type: 'HIGH',
         title: 'Scan Interrupted',
-        description: 'The dynamic scan engine could not reach the target or encountered a protocol error.',
+        description: error.message || 'The dynamic scan engine could not reach the target or encountered a protocol error.',
         remediation: 'Verify the URL is accessible and try again.'
       }]);
     } finally {

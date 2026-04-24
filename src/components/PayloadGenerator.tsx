@@ -47,6 +47,7 @@ export const PayloadGenerator: React.FC<PayloadGeneratorProps> = ({ prefill }) =
   const [selectedTemplate, setSelectedTemplate] = useState(PAYLOAD_TEMPLATES[0]);
   const [customCommand, setCustomCommand] = useState<string | null>(null);
   const [copied, setCopied] = useState(false);
+  const [obfuscation, setObfuscation] = useState<'none' | 'base64' | 'url' | 'hex' | 'mixed'>('none');
 
   // Handle prefill
   React.useEffect(() => {
@@ -66,9 +67,21 @@ export const PayloadGenerator: React.FC<PayloadGeneratorProps> = ({ prefill }) =
     }
   }, [prefill]);
 
-  const generatedPayload = customCommand 
+  const obfuscate = (cmd: string) => {
+    switch (obfuscation) {
+      case 'base64': return `echo "${btoa(cmd)}" | base64 -d | bash`;
+      case 'url': return encodeURIComponent(cmd);
+      case 'hex': return cmd.split('').map(c => '\\x' + c.charCodeAt(0).toString(16)).join('');
+      case 'mixed': return cmd.split('').map(c => Math.random() > 0.5 ? c.toUpperCase() : c.toLowerCase()).join('');
+      default: return cmd;
+    }
+  };
+
+  const rawPayload = customCommand 
     ? customCommand.replace(/{LHOST}/g, lhost).replace(/{LPORT}/g, lport)
     : selectedTemplate.template.replace(/{LHOST}/g, lhost).replace(/{LPORT}/g, lport);
+
+  const generatedPayload = obfuscate(rawPayload);
 
   const handleCopy = () => {
     navigator.clipboard.writeText(generatedPayload);
@@ -78,9 +91,26 @@ export const PayloadGenerator: React.FC<PayloadGeneratorProps> = ({ prefill }) =
 
   return (
     <div className="space-y-4 p-4 lg:p-6 bg-black/40 border border-terminal-border rounded-xl">
-      <div className="flex items-center gap-3 mb-2">
-        <Zap className="w-5 h-5 text-terminal-green" />
-        <h3 className="text-lg font-bold text-terminal-green uppercase tracking-tight">Payload Forge</h3>
+      <div className="flex items-center justify-between gap-3 mb-2">
+        <div className="flex items-center gap-3">
+          <Zap className="w-5 h-5 text-terminal-green" />
+          <h3 className="text-lg font-bold text-terminal-green uppercase tracking-tight">Payload Forge</h3>
+        </div>
+        <div className="flex items-center gap-2">
+          <span className="text-[10px] font-mono text-terminal-text/30 uppercase tracking-widest hidden sm:inline">Obfuscation Layer</span>
+          <Select value={obfuscation} onValueChange={(val: any) => setObfuscation(val)}>
+            <SelectTrigger className="w-32 h-8 bg-black/40 border-terminal-border text-[10px] font-mono">
+              <SelectValue />
+            </SelectTrigger>
+            <SelectContent className="bg-terminal-bg border-terminal-border text-terminal-text">
+              <SelectItem value="none" className="text-[10px] font-mono">NONE (RAW)</SelectItem>
+              <SelectItem value="base64" className="text-[10px] font-mono">BASE64_WRAP</SelectItem>
+              <SelectItem value="url" className="text-[10px] font-mono">URL_ENCODE</SelectItem>
+              <SelectItem value="hex" className="text-[10px] font-mono">HEX_ESCAPE</SelectItem>
+              <SelectItem value="mixed" className="text-[10px] font-mono">POLY_CASE</SelectItem>
+            </SelectContent>
+          </Select>
+        </div>
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4">

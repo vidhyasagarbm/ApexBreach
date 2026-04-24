@@ -32,6 +32,7 @@ import { Input } from '@/components/ui/input';
 import { Card } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Separator } from '@/components/ui/separator';
+import { IdentityForge } from './IdentityForge';
 
 interface PhishingTemplate {
   id: string;
@@ -110,7 +111,7 @@ const TEMPLATES: PhishingTemplate[] = [
 ];
 
 export const SocialEngineeringSuite: React.FC = () => {
-  const [activeSubTab, setActiveSubTab] = useState<'templates' | 'links' | 'campaigns' | 'analytics' | 'vishing'>('templates');
+  const [activeSubTab, setActiveSubTab] = useState<'templates' | 'links' | 'campaigns' | 'analytics' | 'vishing' | 'forge'>('templates');
   const [selectedTemplate, setSelectedTemplate] = useState<PhishingTemplate | null>(null);
   const [targetUrl, setTargetUrl] = useState('https://portal.office.com/login');
   const [maskedUrl, setMaskedUrl] = useState('');
@@ -176,6 +177,7 @@ export const SocialEngineeringSuite: React.FC = () => {
           <div className="flex items-center gap-1 bg-obsidian-card p-1 rounded-lg border border-terminal-border overflow-x-auto custom-scrollbar">
             {[
               { id: 'templates', label: 'Templates', icon: Mail },
+              { id: 'forge', label: 'Identity Forge', icon: Users },
               { id: 'vishing', label: 'Vishing AI', icon: Mic },
               { id: 'links', label: 'Link Forge', icon: LinkIcon },
               { id: 'campaigns', label: 'Campaigns', icon: Send },
@@ -201,6 +203,17 @@ export const SocialEngineeringSuite: React.FC = () => {
 
       <div className="flex-1 overflow-y-auto p-6 lg:p-8 custom-scrollbar min-h-0">
         <AnimatePresence mode="wait">
+          {activeSubTab === 'forge' && (
+            <motion.div
+              key="forge"
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: -20 }}
+              className="h-full"
+            >
+              <IdentityForge />
+            </motion.div>
+          )}
           {activeSubTab === 'templates' && (
             <motion.div
               key="templates"

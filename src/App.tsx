@@ -36,7 +36,8 @@ import {
   ShieldCheck,
   EyeOff,
   Workflow,
-  FileDown
+  FileDown,
+  ShieldAlert
 } from "lucide-react";
 import { Progress } from "@/components/ui/progress";
 import { cn } from "@/lib/utils";
@@ -65,8 +66,9 @@ import { APTEmulation } from "@/src/components/APTEmulation";
 import { StealthLab } from "@/src/components/StealthLab";
 import { OSINTRecon } from "@/src/components/OSINTRecon";
 import { ExploitChainer } from "@/src/components/ExploitChainer";
+import { GOCIntel } from "@/src/components/GOCIntel";
+import { ZeroDayLab } from "@/src/components/ZeroDayLab";
 import { About } from "@/src/components/About";
-import { LiveOpsFeed } from "@/src/components/LiveOpsFeed";
 import { generateBriefingPDF } from "@/src/lib/reportGenerator";
 import { 
   db, 
@@ -134,7 +136,7 @@ export default function App() {
   const [scenarioAnalysis, setScenarioAnalysis] = useState<string | null>(null);
   const [isAnalyzing, setIsAnalyzing] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
-  const [activeTab, setActiveTab] = useState<"handbook" | "map" | "analytics" | "news" | "armory" | "cve" | "darkweb" | "social" | "aired" | "auditor" | "apt" | "stealth" | "recon" | "chainer" | "about">("handbook");
+  const [activeTab, setActiveTab] = useState<"handbook" | "map" | "analytics" | "news" | "armory" | "cve" | "darkweb" | "social" | "aired" | "auditor" | "apt" | "stealth" | "recon" | "chainer" | "goc" | "threats" | "zeroday" | "about">("handbook");
   const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(window.innerWidth < 1024);
   const [isScenarioLabCollapsed, setIsScenarioLabCollapsed] = useState(window.innerWidth < 1280);
   const [payloadPrefill, setPayloadPrefill] = useState<PayloadPrefill | null>(null);
@@ -310,7 +312,6 @@ export default function App() {
                 <div className="lg:block">
                   <h1 className="text-xl font-bold font-display text-text-primary tracking-tight flex items-center gap-2">
                     Apex<span className="text-accent">Breach</span>
-                    <span className="text-[9px] bg-accent/10 text-accent px-1.5 py-0.5 rounded-full border border-accent/20 font-mono font-medium">PRO</span>
                   </h1>
                   <p className="text-[10px] font-mono text-text-secondary uppercase tracking-[0.2em]">Offensive Intelligence</p>
                 </div>
@@ -414,8 +415,8 @@ export default function App() {
         {/* Main Content */}
         <main className="flex-1 flex flex-col min-w-0 bg-black/10 min-h-0 overflow-hidden">
           {/* Header */}
-          <header className="shrink-0 h-auto border-b border-obsidian-border flex flex-col xl:flex-row items-center px-4 lg:px-6 py-3 xl:py-0 bg-obsidian-bg/80 backdrop-blur-xl z-30 gap-3 xl:h-14">
-            <div className="flex items-center justify-between w-full xl:w-auto gap-4">
+          <header className="shrink-0 border-b border-obsidian-border flex flex-col items-center px-4 lg:px-6 py-4 bg-obsidian-bg/80 backdrop-blur-xl z-30 gap-4">
+            <div className="flex items-center justify-between w-full max-w-7xl gap-4">
               <div className="flex items-center gap-3">
                 <Button 
                   variant="ghost" 
@@ -446,25 +447,44 @@ export default function App() {
                 >
                   <Zap className="w-5 h-5" />
                 </Button>
+                
+                <div className="hidden lg:block">
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={handleDownloadReport}
+                    disabled={isGeneratingReport}
+                    className="bg-accent/5 border-accent/20 text-accent hover:bg-accent/10 font-mono text-[10px] h-9 gap-2"
+                  >
+                    {isGeneratingReport ? (
+                      <Activity className="w-3.5 h-3.5 animate-spin" />
+                    ) : (
+                      <FileDown className="w-3.5 h-3.5" />
+                    )}
+                    <span>BRIEFING</span>
+                  </Button>
+                </div>
               </div>
             </div>
             
-            <div className="w-full xl:w-auto px-4 xl:px-0">
-              <div className="flex flex-wrap items-center justify-center xl:justify-start gap-1 bg-obsidian-card/50 p-1 rounded-xl border border-obsidian-border w-full">
+            <div className="w-full max-w-7xl px-4">
+              <div className="flex flex-wrap items-center justify-center gap-1 bg-obsidian-card/50 p-1 rounded-xl border border-obsidian-border w-full">
                 {[
                   { id: "handbook", label: "HANDBOOK", icon: Shield },
-                  { id: "social", label: "SOCIAL ENGIN.", icon: Users },
+                  { id: "goc", label: "GOC INTEL", icon: ShieldAlert },
+                  { id: "zeroday", label: "ZERO DAY", icon: Brain },
+                  { id: "threats", label: "THREAT FEED", icon: Radio },
+                  { id: "recon", label: "AUDIT", icon: Globe },
                   { id: "armory", label: "ARMORY", icon: Zap },
                   { id: "darkweb", label: "DARK WEB", icon: Radio },
                   { id: "cve", label: "CVE INTEL", icon: AlertTriangle },
                   { id: "map", label: "THREAT MAP", icon: Globe },
                   { id: "analytics", label: "ANALYTICS", icon: BarChart3 },
-                  { id: "news", label: "NEWS", icon: Newspaper },
+                  { id: "social", label: "SOCIAL ENGIN.", icon: Users },
                   { id: "aired", label: "AI RED TEAM", icon: Brain },
                   { id: "auditor", label: "AUDITOR", icon: ShieldCheck },
                   { id: "apt", label: "APT ENGINE", icon: Target },
                   { id: "stealth", label: "STEALTH", icon: EyeOff },
-                  { id: "recon", label: "OSINT", icon: Globe },
                   { id: "chainer", label: "CHAINER", icon: Workflow },
                   { id: "about", label: "ABOUT", icon: Info },
                 ].map((tab) => (
@@ -483,23 +503,6 @@ export default function App() {
                   </button>
                 ))}
               </div>
-            </div>
-
-            <div className="hidden xl:flex items-center gap-3 ml-auto">
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={handleDownloadReport}
-                disabled={isGeneratingReport}
-                className="bg-accent/5 border-accent/20 text-accent hover:bg-accent/10 font-mono text-[10px] h-9 gap-2"
-              >
-                {isGeneratingReport ? (
-                  <Activity className="w-3.5 h-3.5 animate-spin" />
-                ) : (
-                  <FileDown className="w-3.5 h-3.5" />
-                )}
-                <span>DOWNLOAD BRIEFING</span>
-              </Button>
             </div>
           </header>
 
@@ -762,6 +765,36 @@ export default function App() {
                 >
                   <ExploitChainer onWeaponize={handleWeaponizeFinding} />
                 </motion.div>
+              ) : activeTab === "zeroday" ? (
+                <motion.div 
+                  key="zeroday"
+                  initial={{ opacity: 0, y: 20 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  exit={{ opacity: 0, y: -20 }}
+                  className="flex-1 flex flex-col overflow-hidden min-h-0"
+                >
+                  <ZeroDayLab />
+                </motion.div>
+              ) : activeTab === "threats" ? (
+                <motion.div 
+                  key="threats"
+                  initial={{ opacity: 0, y: 20 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  exit={{ opacity: 0, y: -20 }}
+                  className="flex-1 flex flex-col overflow-hidden min-h-0"
+                >
+                  <NewsFeed />
+                </motion.div>
+              ) : activeTab === "goc" ? (
+                <motion.div 
+                  key="goc"
+                  initial={{ opacity: 0, y: 20 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  exit={{ opacity: 0, y: -20 }}
+                  className="flex-1 flex flex-col overflow-hidden min-h-0"
+                >
+                  <GOCIntel />
+                </motion.div>
               ) : activeTab === "about" ? (
                 <motion.div 
                   key="about"
@@ -958,17 +991,11 @@ export default function App() {
                 <Zap className="w-4 h-4 text-terminal-green/40" />
               </div>
             )}
-            
-            {!isScenarioLabCollapsed && (
-              <div className="h-[250px] shrink-0 border-t border-terminal-border">
-                <LiveOpsFeed />
-              </div>
-            )}
           </div>
         </div>
       </div>
-        </main>
-      </div>
-    </TooltipProvider>
-  );
+    </main>
+  </div>
+</TooltipProvider>
+);
 }

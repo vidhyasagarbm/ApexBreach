@@ -44,18 +44,32 @@ const FEATURES = [
     category: 'Offensive'
   },
   {
-    title: 'Stealth & Evasion Lab',
-    description: 'Advanced payload obfuscation suite using polymorphic encoding and process hollowing to bypass modern EDR/AV.',
-    icon: EyeOff,
-    color: 'text-purple-500',
-    category: 'Offensive'
-  },
-  {
-    title: 'OSINT Recon Engine',
-    description: 'AI-driven predictive intelligence for attack surface mapping, subdomain discovery, and tech-stack profiling.',
+    title: 'Neural Infrastructure Map',
+    description: 'D3-powered interactive topological mapping with real-time zooming and node exploration for target infrastructure analysis.',
     icon: Globe,
     color: 'text-emerald-500',
     category: 'Intelligence'
+  },
+  {
+    title: 'Zero-Day Research Lab',
+    description: 'Simulate and replicate high-impact experimental vulnerabilities targeting LLM gateways, WebRTC, and DeFi protocols.',
+    icon: Brain,
+    color: 'text-pink-500',
+    category: 'Experimental'
+  },
+  {
+    title: 'Synthetic Identity Forge',
+    description: 'Generate deep-fake persona profiles with career histories and digital footprints for complex social engineering campaigns.',
+    icon: Users,
+    color: 'text-indigo-500',
+    category: 'Offensive'
+  },
+  {
+    title: 'Stealth & Evasion Lab',
+    description: 'Advanced payload obfuscation suite using Polymorphic Case coding and Base64/Hex nesting to bypass modern EDR.',
+    icon: EyeOff,
+    color: 'text-purple-500',
+    category: 'Offensive'
   },
   {
     title: 'Automated Exploit Chainer',
@@ -67,8 +81,8 @@ const FEATURES = [
   {
     title: 'AI Red Team',
     description: 'Interactive AI agent designed for scenario-based offensive security testing and tactical advice.',
-    icon: Brain,
-    color: 'text-pink-500',
+    icon: Cpu,
+    color: 'text-blue-400',
     category: 'AI'
   },
   {
@@ -185,10 +199,10 @@ export const About: React.FC = () => {
           
           <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-4">
             {[
-              { step: '01', title: 'Reconnaissance', desc: 'Passive intelligence gathering and attack surface mapping using AI-driven OSINT.', icon: Search },
-              { step: '02', title: 'Weaponization', desc: 'Crafting custom payloads and obfuscating code in the Stealth Lab to evade detection.', icon: Zap },
-              { step: '03', title: 'Exploitation', desc: 'Executing tactical playbooks and chaining vulnerabilities to achieve objectives.', icon: Target },
-              { step: '04', title: 'Analysis', desc: 'Post-operation review and automated reporting of security posture improvements.', icon: BarChart3 },
+              { step: '01', title: 'Intelligence', desc: 'Neural infrastructure mapping and attack surface visualization via the interactive topology engine.', icon: Search },
+              { step: '02', title: 'Weaponization', desc: 'Crafting custom payloads with multi-layer obfuscation in the Stealth & Evasion Lab.', icon: Zap },
+              { step: '03', title: 'Experimental', desc: 'Replicating Zero-Day vectors and simulating novel exploitation patterns.', icon: Target },
+              { step: '04', title: 'Analysis', desc: 'Generating detailed briefing reports and correlating findings into logical attack paths.', icon: BarChart3 },
             ].map((m, i) => (
               <Card key={i} className="bg-black/40 border-terminal-border p-6 space-y-4">
                 <div className="text-2xl font-black text-accent/20 font-mono">{m.step}</div>
@@ -199,47 +213,6 @@ export const About: React.FC = () => {
                 <p className="text-xs text-terminal-text/40 leading-relaxed">{m.desc}</p>
               </Card>
             ))}
-          </div>
-        </div>
-
-        {/* AI Integration Deep Dive */}
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 items-center">
-          <div className="space-y-6">
-            <Badge className="bg-pink-500/10 text-pink-500 border-pink-500/20 uppercase font-mono text-[10px]">Neural Core</Badge>
-            <h2 className="text-3xl font-bold text-terminal-text tracking-tight">AI-Augmented Cyber Operations</h2>
-            <p className="text-terminal-text/60 leading-relaxed">
-              ApexBreach leverages the **Gemini 1.5 Pro** engine to provide real-time tactical advice, automated code analysis, and predictive threat modeling. Unlike static tools, our AI core understands the context of an engagement, suggesting the most effective TTPs based on the target's specific technology stack and defensive posture.
-            </p>
-            <ul className="space-y-3">
-              {[
-                'Automated payload obfuscation logic generation',
-                'Real-time TTP explanation and deep-dives',
-                'Predictive attack surface mapping',
-                'Natural language scenario analysis'
-              ].map((item, i) => (
-                <li key={i} className="flex items-center gap-3 text-sm text-terminal-text/80">
-                  <div className="w-1.5 h-1.5 rounded-full bg-pink-500" />
-                  {item}
-                </li>
-              ))}
-            </ul>
-          </div>
-          <div className="relative aspect-video rounded-3xl bg-gradient-to-br from-pink-500/10 to-accent/10 border border-white/5 overflow-hidden flex items-center justify-center">
-            <div className="absolute inset-0 bg-[url('https://picsum.photos/seed/ai-tech/800/600')] opacity-20 grayscale" />
-            <Cpu className="w-24 h-24 text-accent animate-pulse relative z-10" />
-            <div className="absolute bottom-6 left-6 right-6 p-4 bg-black/60 backdrop-blur-md border border-white/10 rounded-xl">
-              <div className="flex items-center justify-between text-[10px] font-mono text-terminal-text/40 uppercase">
-                <span>Neural Processing Unit</span>
-                <span className="text-emerald-500">Active</span>
-              </div>
-              <div className="mt-2 h-1 w-full bg-white/5 rounded-full overflow-hidden">
-                <motion.div 
-                  className="h-full bg-accent"
-                  animate={{ width: ['20%', '80%', '40%', '90%', '60%'] }}
-                  transition={{ duration: 5, repeat: Infinity }}
-                />
-              </div>
-            </div>
           </div>
         </div>
 
@@ -402,7 +375,6 @@ export const About: React.FC = () => {
             {[
               { phase: 'Phase 3 (Q3 2026)', title: 'Multi-Agent Orchestration', desc: 'Deploy multiple AI agents to coordinate complex, multi-stage attack chains autonomously.' },
               { phase: 'Phase 4 (Q4 2026)', title: 'Hardware Integration', desc: 'Direct support for tactical hardware interfaces (SDR, WiFi Pineapple, Rubber Ducky) via WebUSB.' },
-              { phase: 'Phase 5 (2027)', title: 'Quantum-Resistant Lab', desc: 'Research and development of post-quantum cryptographic evasion and exploitation techniques.' },
             ].map((item, i) => (
               <div key={i} className="flex items-center gap-6 p-4 rounded-xl bg-white/5 border border-white/10">
                 <div className="shrink-0 w-32">
@@ -517,9 +489,9 @@ export const About: React.FC = () => {
           </div>
           <div className="space-y-4">
             {[
+              { version: 'v2.5.0', date: '2026-04-22', changes: ['Implemented Zero-Day Research Lab', 'New Neural Infrastructure Map with Zoom/Pan', 'Added Synthetic Identity Forge', 'New Stealth Obfuscation Layer (Base64/Hex/PolyCase)'] },
               { version: 'v2.4.0', date: '2026-04-10', changes: ['Integrated Gemini 1.5 Pro Neural Core', 'Added Stealth & Evasion Lab', 'New APT28 Tactical Playbook'] },
               { version: 'v2.3.5', date: '2026-03-25', changes: ['Enhanced OSINT Recon Engine', 'Added Dark Web Monitor real-time feed', 'Improved payload obfuscation algorithms'] },
-              { version: 'v2.2.0', date: '2026-02-15', changes: ['Initial release of Obsidian Core Architecture', 'MITRE ATT&CK v14.1 mapping', 'Weaponization Armory beta'] },
             ].map((v, i) => (
               <div key={i} className="relative pl-8 border-l border-terminal-border group">
                 <div className="absolute left-[-5px] top-0 w-2.5 h-2.5 rounded-full bg-terminal-border group-hover:bg-accent transition-colors" />
@@ -574,7 +546,7 @@ export const About: React.FC = () => {
           </p>
           <div className="flex items-center justify-center gap-8 pt-6">
             <div className="text-center">
-              <div className="text-2xl font-bold text-accent">14+</div>
+              <div className="text-2xl font-bold text-accent">18+</div>
               <div className="text-[10px] font-mono text-terminal-text/30 uppercase">Modules</div>
             </div>
             <div className="text-center">
@@ -591,7 +563,7 @@ export const About: React.FC = () => {
         {/* Footer Note */}
         <div className="text-center pb-12">
           <p className="text-[10px] font-mono text-terminal-text/20 uppercase tracking-[0.2em]">
-            ApexBreach v2.4.0 // Offensive Security Framework // Restricted Access
+            ApexBreach v2.5.0 // Offensive Security Framework // Restricted Access
           </p>
         </div>
       </div>
